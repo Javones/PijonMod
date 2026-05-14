@@ -15,7 +15,6 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
 
 public class PijonModel<T extends Pijon> extends EntityModel<T> {
-	// Σύνδεση του μοντέλου με το "ληξιαρχείο" του mod μας (1.21.1 format)
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("pijonmod", "pijon"), "main");
 
 	private final ModelPart head;

@@ -48,7 +48,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-
 import static net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS;
 
 public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant> {
@@ -148,11 +147,11 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public void aiStep() {
         super.aiStep();
         this.calculateFlapping();
-        if (!this.level().isClientSide && !this.isTame()) {
 
+        if (!this.level().isClientSide && !this.isTame()) {
             Player player = this.level().getNearestPlayer(this, 8.0D);
 
-            if (player != null) {
+            if (player != null && !player.isCreative() && !player.isSpectator()) {
 
                 boolean holdingSeeds =
                         player.getMainHandItem().is(VILLAGER_PLANTABLE_SEEDS) ||
@@ -162,24 +161,39 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
                     double dx = this.getX() - player.getX();
                     double dz = this.getZ() - player.getZ();
-
                     double distance = Math.sqrt(dx * dx + dz * dz);
 
                     if (distance > 0.001D) {
+                        this.pigeonPanic(player.getX(), player.getZ());
 
-                        dx /= distance;
-                        dz /= distance;
-
-                        this.setDeltaMovement(
-                                dx * 0.3D,
-                                0.25D,
-                                dz * 0.3D
-                        );
-
-                        this.hasImpulse = true;
+                        for (Pijon nearbyPijon : this.level().getEntitiesOfClass(Pijon.class, this.getBoundingBox().inflate(5.0D))) {
+                            if (!nearbyPijon.isTame()) {
+                                nearbyPijon.pigeonPanic(player.getX(), player.getZ());
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+
+    private void pigeonPanic(double sourceX, double sourceZ) {
+        double dx = this.getX() - sourceX;
+        double dz = this.getZ() - sourceZ;
+        double distance = Math.sqrt(dx * dx + dz * dz);
+
+        if (distance > 0.001D) {
+            dx /= distance;
+            dz /= distance;
+
+            float targetYaw = (float)(Mth.atan2(dz, dx) * (180D / Math.PI)) - 90.0F;
+
+            this.setYRot(targetYaw);
+            this.yBodyRot = targetYaw;
+            this.yHeadRot = targetYaw;
+
+            this.setDeltaMovement(dx * 0.3D, 0.25D, dz * 0.3D);
+            this.hasImpulse = true;
         }
     }
 
