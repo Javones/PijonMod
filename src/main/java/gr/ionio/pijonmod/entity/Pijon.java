@@ -40,12 +40,16 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+
+import static net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS;
 
 public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant> {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Pijon.class, EntityDataSerializers.INT);
@@ -77,25 +81,57 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new TamableAnimal.TamableAnimalPanicGoal(1.25));
-        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.0, 5.0F, 1.0F));
 
-        // Περίπατος
-        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(0, new FloatGoal(this));
 
-        // Η Νέα, Απλή Πτήση
-        this.goalSelector.addGoal(4, new PijonShortFlyGoal(this));
+        // Πανικός όταν το χτυπάς
+        this.goalSelector.addGoal(1, new PanicGoal(this, 2.8D));
 
-        this.goalSelector.addGoal(5, new LandOnOwnersShoulderGoal(this));
+        // Φόβος από παίκτη
+        this.goalSelector.addGoal(2,
+                new AvoidEntityGoal<>(
+                        this,
+                        Player.class,
+                        10.0F,
+                        1.8D,
+                        2.8D,
+                        player -> {
+
+                            boolean holdingSeeds =
+                                    player.getMainHandItem().is(VILLAGER_PLANTABLE_SEEDS)
+                                            || player.getOffhandItem().is(VILLAGER_PLANTABLE_SEEDS);
+
+                            return !player.isShiftKeyDown()
+                                    && !holdingSeeds
+                                    && !this.isTame();
+                        }
+                )
+        );
+
+        // Ακολουθεί σπόρους
+        this.goalSelector.addGoal(3,
+                new TemptGoal(
+                        this,
+                        1.25D,
+                        Ingredient.of(VILLAGER_PLANTABLE_SEEDS),
+                        false
+                )
+        );
+
+        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.1D, 5.0F, 1.0F));
+        this.goalSelector.addGoal(5, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(9, new PijonShortFlyGoal(this));
+        this.goalSelector.addGoal(10, new LandOnOwnersShoulderGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 6.0)
-                .add(Attributes.FLYING_SPEED, 0.4F)
-                .add(Attributes.MOVEMENT_SPEED, 0.25F)
+                .add(Attributes.FLYING_SPEED, 0.6F)
+                .add(Attributes.MOVEMENT_SPEED, 0.35F)
                 .add(Attributes.ATTACK_DAMAGE, 3.0);
     }
 
@@ -112,6 +148,39 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public void aiStep() {
         super.aiStep();
         this.calculateFlapping();
+        if (!this.level().isClientSide && !this.isTame()) {
+
+            Player player = this.level().getNearestPlayer(this, 8.0D);
+
+            if (player != null) {
+
+                boolean holdingSeeds =
+                        player.getMainHandItem().is(VILLAGER_PLANTABLE_SEEDS) ||
+                                player.getOffhandItem().is(VILLAGER_PLANTABLE_SEEDS);
+
+                if (!player.isShiftKeyDown() && !holdingSeeds) {
+
+                    double dx = this.getX() - player.getX();
+                    double dz = this.getZ() - player.getZ();
+
+                    double distance = Math.sqrt(dx * dx + dz * dz);
+
+                    if (distance > 0.001D) {
+
+                        dx /= distance;
+                        dz /= distance;
+
+                        this.setDeltaMovement(
+                                dx * 0.3D,
+                                0.25D,
+                                dz * 0.3D
+                        );
+
+                        this.hasImpulse = true;
+                    }
+                }
+            }
+        }
     }
 
     private void calculateFlapping() {
@@ -136,7 +205,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
-        if (!this.isTame() && itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
+        if (!this.isTame() && itemstack.is(VILLAGER_PLANTABLE_SEEDS)) {
             itemstack.consume(1, player);
             if (!this.isSilent()) {
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
