@@ -1,13 +1,10 @@
 package gr.ionio.pijonmod.entity;
 
-import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
-import java.util.List;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -22,50 +19,35 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.FollowMobGoal;
-import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
-import net.minecraft.world.entity.ai.goal.LandOnOwnersShoulderGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
-public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant>, FlyingAnimal {
+public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant> {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Pijon.class, EntityDataSerializers.INT);
 
     public float flap;
@@ -77,20 +59,15 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
     public Pijon(EntityType<? extends Pijon> type, Level level) {
         super(type, level);
-        this.moveControl = new FlyingMoveControl(this, 10, false);
         this.setPathfindingMalus(PathType.DANGER_FIRE, -1.0F);
         this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
-        this.setPathfindingMalus(PathType.COCOA, -1.0F);
     }
 
     @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnData) {
         this.setVariant(Util.getRandom(Pijon.Variant.values(), world.getRandom()));
-        if (spawnData == null) {
-            spawnData = new AgeableMob.AgeableMobGroupData(false);
-        }
-        return super.finalizeSpawn(world, difficulty, spawnType, spawnData);
+        return super.finalizeSpawn(world, difficulty, spawnType, spawnData == null ? new AgeableMob.AgeableMobGroupData(false) : spawnData);
     }
 
     @Override
@@ -101,30 +78,34 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new TamableAnimal.TamableAnimalPanicGoal(1.25));
-        this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.0, 5.0F, 1.0F));
-        this.goalSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this,1.0));
-        this.goalSelector.addGoal(3, new LandOnOwnersShoulderGoal(this));
-        this.goalSelector.addGoal(3, new FollowMobGoal(this, 1.0, 3.0F, 7.0F));
+
+        // Περίπατος
+        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0));
+
+        // Η Νέα, Απλή Πτήση
+        this.goalSelector.addGoal(4, new PijonShortFlyGoal(this));
+
+        this.goalSelector.addGoal(5, new LandOnOwnersShoulderGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 6.0)
                 .add(Attributes.FLYING_SPEED, 0.4F)
-                .add(Attributes.MOVEMENT_SPEED, 0.2F)
+                .add(Attributes.MOVEMENT_SPEED, 0.25F)
                 .add(Attributes.ATTACK_DAMAGE, 3.0);
     }
 
     @Override
     protected PathNavigation createNavigation(Level level) {
-        FlyingPathNavigation flyingpathnavigation = new FlyingPathNavigation(this, level);
-        flyingpathnavigation.setCanOpenDoors(false);
-        flyingpathnavigation.setCanFloat(true);
-        flyingpathnavigation.setCanPassDoors(true);
-        return flyingpathnavigation;
+        GroundPathNavigation navigation = new GroundPathNavigation(this, level);
+        navigation.setCanOpenDoors(false);
+        navigation.setCanFloat(true);
+        navigation.setCanPassDoors(true);
+        return navigation;
     }
 
     @Override
@@ -144,6 +125,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
         this.flapping *= 0.9F;
         Vec3 vec3 = this.getDeltaMovement();
+
         if (!this.onGround() && vec3.y < 0.0) {
             this.setDeltaMovement(vec3.multiply(1.0, 0.6, 1.0));
         }
@@ -154,7 +136,6 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
-        // Χρήση σπόρων που ήδη υπάρχουν στο παιχνίδι
         if (!this.isTame() && itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
             itemstack.consume(1, player);
             if (!this.isSilent()) {
@@ -180,13 +161,8 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         return false;
     }
 
-    public static boolean checkPijonSpawnRules(EntityType<Pijon> type, LevelAccessor world, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        return world.getBlockState(pos.below()).is(BlockTags.PARROTS_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
-    }
-
     @Override
-    protected void checkFallDamage(double p_29370_, boolean p_29371_, BlockState p_29372_, BlockPos p_29373_) {
-    }
+    protected void checkFallDamage(double y, boolean onGround, BlockState state, BlockPos pos) { }
 
     @Override
     public boolean canMate(Animal other) {
@@ -217,7 +193,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.PARROT_STEP, 0.15F, 1.0F);
+        this.playSound(SoundEvents.CHICKEN_STEP, 0.15F, 1.0F);
     }
 
     @Override
@@ -292,66 +268,30 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     }
 
     @Override
-    public boolean isFlying() {
-        return !this.onGround();
-    }
-
-    @Override
-    protected boolean canFlyToOwner() {
-        return true;
-    }
-
-    @Override
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, (double)(0.5F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
     }
 
-    static class PijonWanderGoal extends WaterAvoidingRandomFlyingGoal {
-        public PijonWanderGoal(PathfinderMob mob, double speed) {
-            super(mob, speed);
+    static class PijonShortFlyGoal extends Goal {
+        private final Pijon pijon;
+
+        public PijonShortFlyGoal(Pijon pijon) {
+            this.pijon = pijon;
         }
 
-        @Nullable
         @Override
-        protected Vec3 getPosition() {
-            Vec3 vec3 = null;
-            if (this.mob.isInWater()) {
-                vec3 = LandRandomPos.getPos(this.mob, 15, 15);
-            }
-
-            if (this.mob.getRandom().nextFloat() >= this.probability) {
-                vec3 = this.getTreePos();
-            }
-
-            return vec3 == null ? super.getPosition() : vec3;
+        public boolean canUse() {
+            return !this.pijon.isOrderedToSit() && this.pijon.getRandom().nextInt(150) == 0 && this.pijon.onGround();
         }
 
-        @Nullable
-        private Vec3 getTreePos() {
-            BlockPos blockpos = this.mob.blockPosition();
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-            BlockPos.MutableBlockPos blockpos$mutableblockpos1 = new BlockPos.MutableBlockPos();
+        @Override
+        public void start() {
+            float yaw = this.pijon.getYRot() * ((float)Math.PI / 180F);
 
-            for (BlockPos blockpos1 : BlockPos.betweenClosed(
-                    Mth.floor(this.mob.getX() - 3.0),
-                    Mth.floor(this.mob.getY() - 6.0),
-                    Mth.floor(this.mob.getZ() - 3.0),
-                    Mth.floor(this.mob.getX() + 3.0),
-                    Mth.floor(this.mob.getY() + 6.0),
-                    Mth.floor(this.mob.getZ() + 3.0)
-            )) {
-                if (!blockpos.equals(blockpos1)) {
-                    BlockState blockstate = this.mob.level().getBlockState(blockpos$mutableblockpos1.setWithOffset(blockpos1, Direction.DOWN));
-                    boolean flag = blockstate.getBlock() instanceof LeavesBlock || blockstate.is(BlockTags.LOGS);
-                    if (flag
-                            && this.mob.level().isEmptyBlock(blockpos1)
-                            && this.mob.level().isEmptyBlock(blockpos$mutableblockpos.setWithOffset(blockpos1, Direction.UP))) {
-                        return Vec3.atBottomCenterOf(blockpos1);
-                    }
-                }
-            }
+            double forwardX = (double)(-Mth.sin(yaw)) * 0.4;
+            double forwardZ = (double)(Mth.cos(yaw)) * 0.4;
 
-            return null;
+            this.pijon.setDeltaMovement(forwardX, 0.45, forwardZ);
         }
     }
 
@@ -372,17 +312,9 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             this.name = name;
         }
 
-        public int getId() {
-            return this.id;
-        }
-
-        public static Pijon.Variant byId(int id) {
-            return BY_ID.apply(id);
-        }
-
+        public int getId() { return this.id; }
+        public static Pijon.Variant byId(int id) { return BY_ID.apply(id); }
         @Override
-        public String getSerializedName() {
-            return this.name;
-        }
+        public String getSerializedName() { return this.name; }
     }
 }

@@ -72,9 +72,9 @@ public class PijonModel<T extends Pijon> extends EntityModel<T> {
 		this.head.xRot = headPitch * ((float)Math.PI / 180F);
 		this.head.yRot = netHeadYaw * ((float)Math.PI / 180F);
 
-		this.head.z = -0.5F - (float)Math.sin(limbSwing * 2.0F) * limbSwingAmount * 1.5F;
-
 		if (!entity.onGround()) {
+			this.head.z = -0.5F;
+
 			float flyPitch = 0.5F;
 			this.body.xRot = flyPitch;
 			this.tail.xRot = flyPitch;
@@ -86,6 +86,8 @@ public class PijonModel<T extends Pijon> extends EntityModel<T> {
 			this.left_wing.zRot = (float)Math.cos(ageInTicks * 1.2F) * 0.6F;
 			this.right_wing.zRot = -(float)Math.cos(ageInTicks * 1.2F) * 0.6F;
 		} else {
+			this.head.z = -0.5F - (float)Math.sin(limbSwing * 2.0F) * limbSwingAmount * 1.5F;
+
 			this.body.xRot = 0.0F;
 			this.tail.xRot = 0.0F;
 			this.left_wing.xRot = 0.0F;
