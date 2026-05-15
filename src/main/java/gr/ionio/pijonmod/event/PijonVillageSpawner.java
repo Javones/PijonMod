@@ -25,7 +25,7 @@ public class PijonVillageSpawner {
         ServerLevel level = (ServerLevel) event.level;
 
         tickDelay++;
-        if (tickDelay >= 200) {
+        if (tickDelay >= 600) { //30 sec
             tickDelay = 0;
 
             for (Player player : level.players()) {
@@ -33,10 +33,10 @@ public class PijonVillageSpawner {
                 List<Villager> villagers = level.getEntitiesOfClass(Villager.class, searchBox);
 
                 if (villagers.size() >= 2) {
-                    List<Pijon> pigeons = level.getEntitiesOfClass(Pijon.class, searchBox);
-                    int maxPigeons = villagers.size() * 2;
+                    List<Pijon> pijones = level.getEntitiesOfClass(Pijon.class, searchBox);
+                    int maxPijones = villagers.size() * 4;
 
-                    if (pigeons.size() < maxPigeons) {
+                    if (pijones.size() < maxPijones) {
                         Villager randomVillager = villagers.get(level.random.nextInt(villagers.size()));
 
                         int dx = level.random.nextInt(11) - 5;
@@ -59,15 +59,15 @@ public class PijonVillageSpawner {
                         }
 
                         if (spawnPos != null) {
-                            Pijon newPigeon = ModEntities.PIJON.get().create(level);
-                            if (newPigeon != null) {
-                                newPigeon.moveTo(spawnPos, 0.0F, 0.0F);
-                                newPigeon.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null);
-                                level.addFreshEntity(newPigeon);
-                                System.out.println("Success! Pigeon spawned at: " + spawnPos);
+                            Pijon newPijon = ModEntities.PIJON.get().create(level);
+                            if (newPijon != null) {
+                                newPijon.moveTo(spawnPos, 0.0F, 0.0F);
+                                newPijon.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null);
+                                level.addFreshEntity(newPijon);
+                                //System.out.println("Success! Pijon spawned at: " + spawnPos);
                             }
                         } else {
-                            System.out.println("Failed: No suitable ground found.");
+                            //System.out.println("Failed: No suitable ground found.");
                         }
                     }
                 }

@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
@@ -69,7 +70,34 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnData) {
-        this.setVariant(Util.getRandom(Pijon.Variant.values(), world.getRandom()));
+        // Παίρνουμε το Biome στο οποίο γεννήθηκε το περιστέρι
+        net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = world.getBiome(this.blockPosition());
+
+        // CHERRY GROVE: Άσπρο, ή σπάνιο Μωβ (1 στις 100 πιθανότητα, όπως τα ροζ πρόβατα!)
+        if (biome.is(net.minecraft.tags.BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("cherry_grove")) {
+            if (this.random.nextInt(100) == 0) {
+                this.setVariant(Variant.PURPLE);
+            } else {
+                this.setVariant(Variant.WHITE);
+            }
+        }
+        // MUSHROOM FIELDS: Μόνο Κόκκινο
+        else if (biome.is(net.minecraft.tags.BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("mushroom_fields")) {
+            this.setVariant(Variant.RED);
+        }
+        // SAVANNA: Μόνο Καφέ και Γκριζο-καφέ (50-50 πιθανότητα)
+        else if (biome.is(net.minecraft.tags.BiomeTags.IS_SAVANNA)) {
+            this.setVariant(this.random.nextBoolean() ? Variant.BROWN : Variant.GREY_BROWN);
+        }
+        // ΟΛΑ ΤΑ ΑΛΛΑ BIOMES (Plains, Forest, Taiga κλπ): Γκρι, Καφέ, Γκριζο-καφέ, Άσπρο
+        else {
+            int randomColor = this.random.nextInt(4);
+            if (randomColor == 0) this.setVariant(Variant.GREY);
+            else if (randomColor == 1) this.setVariant(Variant.BROWN);
+            else if (randomColor == 2) this.setVariant(Variant.GREY_BROWN);
+            else this.setVariant(Variant.WHITE);
+        }
+
         return super.finalizeSpawn(world, difficulty, spawnType, spawnData == null ? new AgeableMob.AgeableMobGroupData(false) : spawnData);
     }
 
@@ -399,11 +427,12 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     }
 
     public static enum Variant implements StringRepresentable {
-        RED_BLUE(0, "red_blue"),
-        BLUE(1, "blue"),
-        GREEN(2, "green"),
-        YELLOW_BLUE(3, "yellow_blue"),
-        GRAY(4, "gray");
+        GREY(0, "grey"),
+        BROWN(1, "browm"),
+        GREY_BROWN(2, "grey_brown"),
+        WHITE(3, "white"),
+        PURPLE(4, "purple"),
+        RED(5, "red");
 
         public static final Codec<Pijon.Variant> CODEC = StringRepresentable.fromEnum(Pijon.Variant::values);
         private static final IntFunction<Pijon.Variant> BY_ID = ByIdMap.continuous(Pijon.Variant::getId, values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
