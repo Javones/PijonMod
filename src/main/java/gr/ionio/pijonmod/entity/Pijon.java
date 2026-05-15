@@ -77,6 +77,8 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         if (biome.is(net.minecraft.tags.BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("cherry_grove")) {
             if (this.random.nextInt(100) == 0) {
                 this.setVariant(Variant.PURPLE);
+            } else if (this.random.nextInt(7) == 0){
+                this.setVariant(Variant.DOTTED);
             } else {
                 this.setVariant(Variant.WHITE);
             }
@@ -87,14 +89,15 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         }
         // SAVANNA: Μόνο Καφέ και Γκριζο-καφέ (50-50 πιθανότητα)
         else if (biome.is(net.minecraft.tags.BiomeTags.IS_SAVANNA)) {
-            this.setVariant(this.random.nextBoolean() ? Variant.BROWN : Variant.GREY_BROWN);
+            this.setVariant(this.random.nextBoolean() ? Variant.BROWN : Variant.BROWN_GREY);
         }
         // ΟΛΑ ΤΑ ΑΛΛΑ BIOMES (Plains, Forest, Taiga κλπ): Γκρι, Καφέ, Γκριζο-καφέ, Άσπρο
         else {
-            int randomColor = this.random.nextInt(4);
+            int randomColor = this.random.nextInt(6);
             if (randomColor == 0) this.setVariant(Variant.GREY);
             else if (randomColor == 1) this.setVariant(Variant.BROWN);
-            else if (randomColor == 2) this.setVariant(Variant.GREY_BROWN);
+            else if (randomColor == 2) this.setVariant(Variant.BROWN_GREY);
+            else if (randomColor == 5) this.setVariant(Variant.DOTTED);
             else this.setVariant(Variant.WHITE);
         }
 
@@ -431,11 +434,11 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public static enum Variant implements StringRepresentable {
         GREY(0, "grey"),
         BROWN(1, "brown"),
-        GREY_BROWN(2, "grey_brown"),
+        BROWN_GREY(2, "brown_grey"),
         WHITE(3, "white"),
         PURPLE(4, "purple"),
-        RED(5, "red"),
-        DOTTED(6, "dotted");
+        DOTTED(5, "dotted"),
+        RED(6, "red");
 
         public static final Codec<Pijon.Variant> CODEC = StringRepresentable.fromEnum(Pijon.Variant::values);
         private static final IntFunction<Pijon.Variant> BY_ID = ByIdMap.continuous(Pijon.Variant::getId, values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
