@@ -123,7 +123,6 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(9, new PijonShortFlyGoal(this));
-        this.goalSelector.addGoal(10, new LandOnOwnersShoulderGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -219,6 +218,8 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
+
+        // 1. ΛΟΓΙΚΗ ΕΞΗΜΕΡΩΣΗΣ (Taming)
         if (!this.isTame() && itemstack.is(VILLAGER_PLANTABLE_SEEDS)) {
             itemstack.consume(1, player);
             if (!this.isSilent()) {
@@ -234,9 +235,28 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 }
             }
             return InteractionResult.sidedSuccess(this.level().isClientSide);
-        } else {
-            return super.mobInteract(player, hand);
         }
+
+        // 2. ΛΟΓΙΚΗ ΓΙΑ ΤΑΜΕ ΠΕΡΙΣΤΕΡΙΑ (Απλό Κάθισμα)
+        if (this.isTame() && this.isOwnedBy(player)) {
+            if (!this.level().isClientSide && hand == InteractionHand.MAIN_HAND) {
+
+                // Αντιστρέφει την τρέχουσα κατάσταση (αν κάθεται, σηκώνεται και το αντίστροφο)
+                boolean isSitting = !this.isOrderedToSit();
+                this.setOrderedToSit(isSitting);
+                this.setInSittingPose(isSitting);
+
+                // Σταματάει οποιαδήποτε άλλη κίνηση έκανε εκείνη τη στιγμή
+                this.jumping = false;
+                this.navigation.stop();
+                this.setTarget(null);
+
+                return InteractionResult.SUCCESS;
+            }
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+
+        return super.mobInteract(player, hand);
     }
 
     @Override
