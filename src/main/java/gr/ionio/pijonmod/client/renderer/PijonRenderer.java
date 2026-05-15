@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public class PijonRenderer extends MobRenderer<Pijon, PijonModel<Pijon>> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("pijonmod", "textures/entity/pijon/pijon.png");
-
     public PijonRenderer(EntityRendererProvider.Context context) {
         super(context, new PijonModel<>(context.bakeLayer(PijonModel.LAYER_LOCATION)), 0.3f);
     }
