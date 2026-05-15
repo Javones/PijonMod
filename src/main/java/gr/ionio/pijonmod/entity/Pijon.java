@@ -52,6 +52,9 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Pijon.class, EntityDataSerializers.INT);
 
     public float flap;
+    //Μεταβλητές για Γράμμα
+    public ItemStack carriedLetter = ItemStack.EMPTY;
+    public String targetPlayerName = "";
     public float flapSpeed;
     public float oFlapSpeed;
     public float oFlap;
@@ -65,7 +68,6 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
     }
 
-    @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnData) {
         //Getting Biome in which the pijon is spawning in
@@ -109,6 +111,8 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
     @Override
     protected void registerGoals() {
+
+        this.goalSelector.addGoal(1, new DeliverLetterGoal(this));
 
         this.goalSelector.addGoal(0, new FloatGoal(this));
 
@@ -279,6 +283,25 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
         //Simple sitting logic
         if (this.isTame() && this.isOwnedBy(player)) {
+
+            // Ελέγχει αν το αντικείμενο είναι Υπογεγραμμένο Βιβλίο
+            if (itemstack.is(net.minecraft.world.item.Items.WRITTEN_BOOK)) {
+                if (!this.level().isClientSide) {
+                    this.carriedLetter = itemstack.copyWithCount(1);
+                    itemstack.shrink(1);
+
+                    // Ο Τίτλος που έδωσες στο βιβλίο όταν το υπέγραψες, γίνεται ο στόχος του περιστεριού
+                    this.targetPlayerName = this.carriedLetter.getHoverName().getString().replaceAll("[^a-zA-Z0-9_]", "");
+
+                    this.setOrderedToSit(false);
+                    this.setInSittingPose(false);
+
+                    // Στέλνει το μήνυμα σε σένα ότι παρέλαβε το βιβλίο
+                    player.displayClientMessage(net.minecraft.network.chat.Component.literal("Taking letter to " + this.targetPlayerName), false);
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+
             if (!this.level().isClientSide && hand == InteractionHand.MAIN_HAND) {
 
                 //Reversing state
@@ -403,6 +426,11 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         super.addAdditionalSaveData(compound);
         compound.putInt("Variant", this.getVariant().id);
         compound.putInt("PoopLayTime", this.poopTime);
+
+        if (!this.carriedLetter.isEmpty()) {
+            compound.put("Letter", this.carriedLetter.saveOptional(this.registryAccess()));
+            compound.putString("TargetPlayer", this.targetPlayerName);
+        }
     }
 
     @Override
@@ -411,6 +439,20 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         this.setVariant(Pijon.Variant.byId(compound.getInt("Variant")));
         if (compound.contains("PoopLayTime")) {
             this.poopTime = compound.getInt("PoopLayTime");
+        }
+
+        if (compound.contains("Letter")) {
+            this.carriedLetter = ItemStack.parseOptional(this.registryAccess(), compound.getCompound("Letter"));
+            this.targetPlayerName = compound.getString("TargetPlayer");
+        }
+    }
+
+    // Αν πεθάνει το περιστέρι, ρίχνει το γράμμα κάτω για να μη χαθεί
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
+        if (!this.carriedLetter.isEmpty()) {
+            this.spawnAtLocation(this.carriedLetter);
         }
     }
 
@@ -439,6 +481,61 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             double forwardZ = (double)(Mth.cos(yaw)) * 0.4;
 
             this.pijon.setDeltaMovement(forwardX, 0.45, forwardZ);
+        }
+    }
+
+    static class DeliverLetterGoal extends Goal {
+        private final Pijon pijon;
+        private Player targetPlayer;
+
+        public DeliverLetterGoal(Pijon pijon) {
+            this.pijon = pijon;
+            this.setFlags(java.util.EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return !this.pijon.carriedLetter.isEmpty() && !this.pijon.targetPlayerName.isEmpty() && !this.pijon.isOrderedToSit();
+        }
+
+        @Override
+        public void tick() {
+            // Ψάχνει τον παίκτη
+            if (this.targetPlayer == null || !this.targetPlayer.getName().getString().replaceAll("[^a-zA-Z0-9_]", "").equalsIgnoreCase(this.pijon.targetPlayerName)) {
+                for (Player p : this.pijon.level().players()) {
+                    String pName = p.getName().getString().replaceAll("[^a-zA-Z0-9_]", "");
+                    if (pName.equalsIgnoreCase(this.pijon.targetPlayerName)) {
+                        this.targetPlayer = p;
+                        break;
+                    }
+                }
+            }
+
+            // Αν τον βρήκε, πετάει
+            if (this.targetPlayer != null) {
+                this.pijon.getLookControl().setLookAt(this.targetPlayer, 10.0F, (float)this.pijon.getMaxHeadXRot());
+                this.pijon.getNavigation().moveTo(this.targetPlayer, 1.5D);
+
+                double dX = this.pijon.getX() - this.targetPlayer.getX();
+                double dZ = this.pijon.getZ() - this.targetPlayer.getZ();
+                double horizontalDistance = Math.sqrt(dX * dX + dZ * dZ);
+
+                if (horizontalDistance < 3.0D) {
+
+                    net.minecraft.world.entity.LivingEntity owner = this.pijon.getOwner();
+                    if (owner instanceof Player) {
+                        ((Player) owner).displayClientMessage(net.minecraft.network.chat.Component.literal("Letter delivered!"), false);
+                    }
+
+                    this.pijon.spawnAtLocation(this.pijon.carriedLetter.copy());
+
+                    this.pijon.carriedLetter = ItemStack.EMPTY;
+                    this.pijon.targetPlayerName = "";
+                    this.targetPlayer = null;
+
+                    this.pijon.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+                }
+            }
         }
     }
 
