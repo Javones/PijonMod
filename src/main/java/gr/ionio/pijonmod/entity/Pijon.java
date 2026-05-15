@@ -430,11 +430,12 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
     public static enum Variant implements StringRepresentable {
         GREY(0, "grey"),
-        BROWN(1, "browm"),
+        BROWN(1, "brown"),
         GREY_BROWN(2, "grey_brown"),
         WHITE(3, "white"),
         PURPLE(4, "purple"),
-        RED(5, "red");
+        RED(5, "red"),
+        DOTTED(6, "dotted");
 
         public static final Codec<Pijon.Variant> CODEC = StringRepresentable.fromEnum(Pijon.Variant::values);
         private static final IntFunction<Pijon.Variant> BY_ID = ByIdMap.continuous(Pijon.Variant::getId, values(), ByIdMap.OutOfBoundsStrategy.CLAMP);

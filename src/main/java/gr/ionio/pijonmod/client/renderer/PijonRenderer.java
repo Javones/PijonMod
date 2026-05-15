@@ -15,6 +15,8 @@ public class PijonRenderer extends MobRenderer<Pijon, PijonModel<Pijon>> {
 
     @Override
     public ResourceLocation getTextureLocation(Pijon entity) {
-        return TEXTURE;
+        String variantName = entity.getVariant().getSerializedName();
+
+        return ResourceLocation.fromNamespaceAndPath("pijonmod", "textures/entity/pijon/pijon_" + variantName + ".png");
     }
 }
