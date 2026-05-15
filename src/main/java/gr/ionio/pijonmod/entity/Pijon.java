@@ -135,15 +135,17 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 )
         );
 
-        // Ακολουθεί σπόρους
-        this.goalSelector.addGoal(3,
-                new TemptGoal(
-                        this,
-                        1.25D,
-                        Ingredient.of(VILLAGER_PLANTABLE_SEEDS),
-                        false
-                )
-        );
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(VILLAGER_PLANTABLE_SEEDS), false) {
+            @Override
+            public boolean canUse() {
+                return super.canUse() && !Pijon.this.isOrderedToSit();
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return super.canContinueToUse() && !Pijon.this.isOrderedToSit();
+            }
+        });
 
         this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.1D, 5.0F, 1.0F));
         this.goalSelector.addGoal(5, new SitWhenOrderedToGoal(this));
