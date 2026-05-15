@@ -3,7 +3,8 @@ package gr.ionio.pijonmod.entity;
 import com.mojang.serialization.Codec;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
+
+import gr.ionio.pijonmod.init.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,12 +14,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BiomeTags;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -30,7 +27,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -41,11 +37,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -60,6 +57,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public float oFlap;
     private float flapping = 1.0F;
     private float nextFlap = 1.0F;
+    public int poopTime = this.random.nextInt(3600) + 3600;
 
     public Pijon(EntityType<? extends Pijon> type, Level level) {
         super(type, level);
@@ -70,10 +68,10 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnData) {
-        // Παίρνουμε το Biome στο οποίο γεννήθηκε το περιστέρι
+        //Getting Biome in which the pijon is spawning in
         net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = world.getBiome(this.blockPosition());
 
-        // CHERRY GROVE: Άσπρο, ή σπάνιο Μωβ (1 στις 100 πιθανότητα, όπως τα ροζ πρόβατα!)
+        //Cherry grove: White or rare purple (1 in 100 chance)
         if (biome.is(net.minecraft.tags.BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("cherry_grove")) {
             if (this.random.nextInt(100) == 0) {
                 this.setVariant(Variant.PURPLE);
@@ -83,15 +81,15 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 this.setVariant(Variant.WHITE);
             }
         }
-        // MUSHROOM FIELDS: Μόνο Κόκκινο
+        //Mushroom fields: Only red
         else if (biome.is(net.minecraft.tags.BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("mushroom_fields")) {
             this.setVariant(Variant.RED);
         }
-        // SAVANNA: Μόνο Καφέ και Γκριζο-καφέ (50-50 πιθανότητα)
+        //Savanna: Only brown and brown-gray
         else if (biome.is(net.minecraft.tags.BiomeTags.IS_SAVANNA)) {
             this.setVariant(this.random.nextBoolean() ? Variant.BROWN : Variant.BROWN_GREY);
         }
-        // ΟΛΑ ΤΑ ΑΛΛΑ BIOMES (Plains, Forest, Taiga κλπ): Γκρι, Καφέ, Γκριζο-καφέ, Άσπρο
+        //Rest of the biomes: Grey, brown grey-brown, white, dotted
         else {
             int randomColor = this.random.nextInt(6);
             if (randomColor == 0) this.setVariant(Variant.GREY);
@@ -114,10 +112,10 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
         this.goalSelector.addGoal(0, new FloatGoal(this));
 
-        // Πανικός όταν το χτυπάς
+        //Panic when hit
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.8D));
 
-        // Φόβος από παίκτη
+        //Fear from player
         this.goalSelector.addGoal(2,
                 new AvoidEntityGoal<>(
                         this,
@@ -196,20 +194,29 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                     double distance = Math.sqrt(dx * dx + dz * dz);
 
                     if (distance > 0.001D) {
-                        this.pigeonPanic(player.getX(), player.getZ());
+                        this.pijonPanic(player.getX(), player.getZ());
 
                         for (Pijon nearbyPijon : this.level().getEntitiesOfClass(Pijon.class, this.getBoundingBox().inflate(5.0D))) {
                             if (!nearbyPijon.isTame()) {
-                                nearbyPijon.pigeonPanic(player.getX(), player.getZ());
+                                nearbyPijon.pijonPanic(player.getX(), player.getZ());
                             }
                         }
                     }
                 }
             }
         }
+
+        //Dropping poops
+        if (!this.level().isClientSide && this.isAlive()) {
+            if (--this.poopTime <= 0) {
+                this.spawnAtLocation(ModItems.PIJON_POOP.get());
+                this.gameEvent(GameEvent.ENTITY_PLACE);
+                this.poopTime = this.random.nextInt(3600) + 3600;
+            }
+        }
     }
 
-    private void pigeonPanic(double sourceX, double sourceZ) {
+    private void pijonPanic(double sourceX, double sourceZ) {
         double dx = this.getX() - sourceX;
         double dz = this.getZ() - sourceZ;
         double distance = Math.sqrt(dx * dx + dz * dz);
@@ -252,7 +259,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
-        // 1. ΛΟΓΙΚΗ ΕΞΗΜΕΡΩΣΗΣ (Taming)
+        //Taming logic
         if (!this.isTame() && itemstack.is(VILLAGER_PLANTABLE_SEEDS)) {
             itemstack.consume(1, player);
             if (!this.isSilent()) {
@@ -270,16 +277,16 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
 
-        // 2. ΛΟΓΙΚΗ ΓΙΑ ΤΑΜΕ ΠΕΡΙΣΤΕΡΙΑ (Απλό Κάθισμα)
+        //Simple sitting logic
         if (this.isTame() && this.isOwnedBy(player)) {
             if (!this.level().isClientSide && hand == InteractionHand.MAIN_HAND) {
 
-                // Αντιστρέφει την τρέχουσα κατάσταση (αν κάθεται, σηκώνεται και το αντίστροφο)
+                //Reversing state
                 boolean isSitting = !this.isOrderedToSit();
                 this.setOrderedToSit(isSitting);
                 this.setInSittingPose(isSitting);
 
-                // Σταματάει οποιαδήποτε άλλη κίνηση έκανε εκείνη τη στιγμή
+                //Stopping all other movement
                 this.jumping = false;
                 this.navigation.stop();
                 this.setTarget(null);
@@ -395,12 +402,16 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("Variant", this.getVariant().id);
+        compound.putInt("PoopLayTime", this.poopTime);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.setVariant(Pijon.Variant.byId(compound.getInt("Variant")));
+        if (compound.contains("PoopLayTime")) {
+            this.poopTime = compound.getInt("PoopLayTime");
+        }
     }
 
     @Override
