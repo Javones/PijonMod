@@ -6,6 +6,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.entity.Entity;
 
 public class PijonPoopEntity extends ThrowableItemProjectile {
 
@@ -31,10 +34,20 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
         return ModItems.PIJON_POOP.get();
     }
 
-    // --------------------------------------------------------
-    // ΑΠΟ ΕΔΩ ΚΑΙ ΚΑΤΩ ΕΙΝΑΙ Η ΣΕΙΡΑ ΣΟΥ!
-    // Εδώ θα γράψεις την onHit() ή onHitEntity()
-    // για να βάλεις το effect της βρώμας που συζητήσαμε!
-    // --------------------------------------------------------
+    @Override
+    protected void onHitEntity(EntityHitResult hitResult) {
+        super.onHitEntity(hitResult);
+        Entity target = hitResult.getEntity();
 
+        target.hurt(this.damageSources().thrown(this, this.getOwner()), 2.0F);
+    }
+
+    @Override
+    protected void onHit(HitResult hitResult) {
+        super.onHit(hitResult);
+
+        if (!this.level().isClientSide()) {
+            this.discard();
+        }
+    }
 }
