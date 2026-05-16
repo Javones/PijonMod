@@ -165,7 +165,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 .add(Attributes.MAX_HEALTH, 6.0)
                 .add(Attributes.FLYING_SPEED, 0.6F)
                 .add(Attributes.MOVEMENT_SPEED, 0.35F)
-                .add(Attributes.ATTACK_DAMAGE, 3.0);
+                .add(Attributes.ATTACK_DAMAGE, 256.0);
     }
 
     @Override
@@ -263,8 +263,8 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
-        //Taming logic
-        if (!this.isTame() && itemstack.is(VILLAGER_PLANTABLE_SEEDS)) {
+        // 1. Taming logic
+        if (!this.isTame() && itemstack.is(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
             itemstack.consume(1, player);
             if (!this.isSilent()) {
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
@@ -281,35 +281,37 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
 
-        //Simple sitting logic
+        // 2. Logic για Tamed περιστέρια
         if (this.isTame() && this.isOwnedBy(player)) {
 
-            // Ελέγχει αν το αντικείμενο είναι Υπογεγραμμένο Βιβλίο
-            if (itemstack.is(net.minecraft.world.item.Items.WRITTEN_BOOK)) {
+            // Δέχεται ΕΙΤΕ Υπογεγραμμένο Βιβλίο, ΕΙΤΕ Χαρτί (με όνομα από το Αμόνι)
+            boolean isWrittenBook = itemstack.is(net.minecraft.world.item.Items.WRITTEN_BOOK);
+            boolean isNamedPaper = itemstack.is(net.minecraft.world.item.Items.PAPER) && itemstack.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME);
+
+            if (isWrittenBook || isNamedPaper) {
                 if (!this.level().isClientSide) {
                     this.carriedLetter = itemstack.copyWithCount(1);
                     itemstack.shrink(1);
 
-                    // Ο Τίτλος που έδωσες στο βιβλίο όταν το υπέγραψες, γίνεται ο στόχος του περιστεριού
+                    // Παίρνει το όνομα είτε από τον τίτλο του βιβλίου είτε από το όνομα του χαρτιού
                     this.targetPlayerName = this.carriedLetter.getHoverName().getString().replaceAll("[^a-zA-Z0-9_]", "");
 
                     this.setOrderedToSit(false);
                     this.setInSittingPose(false);
 
-                    // Στέλνει το μήνυμα σε σένα ότι παρέλαβε το βιβλίο
+                    // Στέλνει το μήνυμα σε σένα ότι παρέλαβε το γράμμα/βιβλίο
                     player.displayClientMessage(net.minecraft.network.chat.Component.literal("Taking letter to " + this.targetPlayerName), false);
                 }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
 
             if (!this.level().isClientSide && hand == InteractionHand.MAIN_HAND) {
-
-                //Reversing state
+                // Reversing state (Κάθισμα/Σήκωμα)
                 boolean isSitting = !this.isOrderedToSit();
                 this.setOrderedToSit(isSitting);
                 this.setInSittingPose(isSitting);
 
-                //Stopping all other movement
+                // Stopping all other movement
                 this.jumping = false;
                 this.navigation.stop();
                 this.setTarget(null);
