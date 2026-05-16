@@ -284,6 +284,27 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         // 2. Logic για Tamed περιστέρια
         if (this.isTame() && this.isOwnedBy(player)) {
 
+            if (itemstack.is(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS) && this.getHealth() < this.getMaxHealth()) {
+                if (!this.level().isClientSide) {
+                    itemstack.consume(1, player); // Τρώει 1 σπόρο
+                    this.heal(1.0F); // Παίρνει πίσω μισή ζωή
+                    this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+
+                    // ΕΛΕΓΧΟΣ ΜΕΤΑ ΤΟ ΦΑΓΗΤΟ:
+                    if (this.getHealth() >= this.getMaxHealth()) {
+                        // Αν αυτός ο σπόρος το φούλαρε, βγάζει Καρδούλες!
+                        this.level().broadcastEntityEvent(this, (byte)7);
+                    } else {
+                        // Αν χρειάζεται κι άλλο φαγητό, βγάζει Πράσινα Αστεράκια
+                        ((net.minecraft.server.level.ServerLevel) this.level()).sendParticles(
+                                net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,
+                                this.getX(), this.getY() + 0.5D, this.getZ(),
+                                7, 0.3D, 0.3D, 0.3D, 0.0D);
+                    }
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+
             // Δέχεται ΕΙΤΕ Υπογεγραμμένο Βιβλίο, ΕΙΤΕ Χαρτί (με όνομα από το Αμόνι)
             boolean isWrittenBook = itemstack.is(net.minecraft.world.item.Items.WRITTEN_BOOK);
             boolean isNamedPaper = itemstack.is(net.minecraft.world.item.Items.PAPER) && itemstack.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME);
