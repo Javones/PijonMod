@@ -43,7 +43,9 @@ public class PijonMod {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) { LOGGER.info("Pijon Mod is loading..."); }
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        LOGGER.info("Pijon Mod is loading...");
+    }
 
     private void registerAttributes(net.minecraftforge.event.entity.EntityAttributeCreationEvent event) {
         event.put(gr.ionio.pijonmod.init.ModEntities.PIJON.get(), gr.ionio.pijonmod.entity.Pijon.createAttributes().build());
@@ -60,13 +62,21 @@ public class PijonMod {
         LOGGER.info("Pijon Mod successfully loaded!");
     }
 
+    @SubscribeEvent
+    public void onBrewingRecipes(BrewingRecipeRegisterEvent event) {
+        event.getBuilder().addMix(
+                Potions.AWKWARD,
+                ModItems.PIJON_POOP.get(),
+                ModPotions.STINK_POTION.getHolder().get()
+        );
+    }
+
     @Mod.EventBusSubscriber(modid = "pijonmod", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
 
         @SubscribeEvent
         public static void registerRenderers(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON.get(), gr.ionio.pijonmod.client.renderer.PijonRenderer::new);
-
             event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON_POOP_PROJECTILE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         }
 
@@ -75,35 +85,7 @@ public class PijonMod {
             event.registerLayerDefinition(gr.ionio.pijonmod.client.model.PijonModel.LAYER_LOCATION, gr.ionio.pijonmod.client.model.PijonModel::createBodyLayer);
         }
 
-        @SubscribeEvent
-        public static void onRenderTick(TickEvent.RenderTickEvent event) {
-            if (event.phase == TickEvent.Phase.END) {
-                StinkOverlay.renderStink();
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            Player player = event.player;
-
-            if (player.hasEffect(ModEffects.STINK.getHolder().get())) {
-                if (player.isInWater()) {
-                    player.removeEffect(ModEffects.STINK.getHolder().get());
-                }
-            }
-        }
-    }
-
-
-    @SubscribeEvent
-    public void onBrewingRecipes(BrewingRecipeRegisterEvent event) {
-        event.getBuilder().addMix(
-                Potions.AWKWARD,
-                ModItems.PIJON_POOP.get(),
-                ModPotions.STINK_POTION.getHolder().get()
-        );
+        // (Διαγράφηκε από εδώ το λάθος onRenderTick)
     }
 
     // ==========================================
