@@ -1,6 +1,9 @@
 package gr.ionio.pijonmod.entity; // Βάλτο στον φάκελο entity
 
+import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
@@ -39,7 +42,17 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
         super.onHitEntity(hitResult);
         Entity target = hitResult.getEntity();
 
-        target.hurt(this.damageSources().thrown(this, this.getOwner()), 2.0F);
+        //Damage
+        target.hurt(this.damageSources().thrown(this, this.getOwner()), 1.0F);
+
+        //Stink
+        if (target instanceof LivingEntity livingTarget) {
+            livingTarget.addEffect(new MobEffectInstance(
+                    ModEffects.STINK.getHolder().get(),
+                    -1,
+                    0
+            ));
+        }
     }
 
     @Override
