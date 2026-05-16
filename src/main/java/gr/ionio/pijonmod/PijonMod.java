@@ -105,4 +105,35 @@ public class PijonMod {
                 ModPotions.STINK_POTION.getHolder().get()
         );
     }
+
+    // ==========================================
+    // IN-GAME EVENTS (FORGE BUS)
+    // ==========================================
+
+    // 1. Γραφικά (Τρέχει ΜΟΝΟ στον Client για να μην κρασάρει ο Server)
+    @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = "pijonmod", bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE, value = net.minecraftforge.api.distmarker.Dist.CLIENT)
+    public static class ClientForgeEvents {
+        @net.minecraftforge.eventbus.api.SubscribeEvent
+        public static void onRenderTick(net.minecraftforge.event.TickEvent.RenderTickEvent event) {
+            if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
+                gr.ionio.pijonmod.client.StinkOverlay.renderStink();
+            }
+        }
+    }
+
+    // 2. Λογική Παιχνιδιού (Τρέχει παντού, Client & Server)
+    @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = "pijonmod", bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
+    public static class CommonForgeEvents {
+        @net.minecraftforge.eventbus.api.SubscribeEvent
+        public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
+            if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
+                net.minecraft.world.entity.player.Player player = event.player;
+                if (player != null && player.hasEffect(gr.ionio.pijonmod.init.ModEffects.STINK.getHolder().get())) {
+                    if (player.isInWater()) {
+                        player.removeEffect(gr.ionio.pijonmod.init.ModEffects.STINK.getHolder().get());
+                    }
+                }
+            }
+        }
+    }
 }
