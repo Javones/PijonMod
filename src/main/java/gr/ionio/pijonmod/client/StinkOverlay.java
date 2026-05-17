@@ -1,25 +1,27 @@
 package gr.ionio.pijonmod.client;
 
-import gr.ionio.pijonmod.init.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.effect.MobEffects;
 
 public class StinkOverlay {
-    private static final ResourceLocation STINK_TEXTURE = ResourceLocation.parse("pijonmod:textures/gui/stink_overlay.png");
+    private static final ResourceLocation STINK_TEXTURE = ResourceLocation.fromNamespaceAndPath("pijonmod", "textures/gui/stink_overlay.png");
 
-    public static void renderStink() {
+    public static void renderStink(GuiGraphics guiGraphics) {
         Minecraft minecraft = Minecraft.getInstance();
 
-        if (minecraft.player != null && minecraft.player.hasEffect(ModEffects.STINK.getHolder().get())) {
-            GuiGraphics guiGraphics = new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
+        if (minecraft.player != null && minecraft.player.hasEffect(gr.ionio.pijonmod.init.ModEffects.STINK.getHolder().get())) {
+
             int width = minecraft.getWindow().getGuiScaledWidth();
             int height = minecraft.getWindow().getGuiScaledHeight();
 
+            // Κρατάμε τα χρώματα στο 100% φωτεινότητα
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.enableBlend();
-            guiGraphics.blit(STINK_TEXTURE, 0, 0, -90, 0.0F, 0.0F, width, height, width, height);
+
+            guiGraphics.blit(STINK_TEXTURE, 0, 0, 0, 0, width, height, width, height);
+
             RenderSystem.disableBlend();
         }
     }

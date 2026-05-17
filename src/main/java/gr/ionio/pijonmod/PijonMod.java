@@ -2,15 +2,18 @@ package gr.ionio.pijonmod;
 
 import com.mojang.logging.LogUtils;
 import gr.ionio.pijonmod.client.StinkOverlay;
+import gr.ionio.pijonmod.client.renderer.PijonRenderer;
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
 import gr.ionio.pijonmod.init.ModPotions;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -73,40 +76,29 @@ public class PijonMod {
 
     @Mod.EventBusSubscriber(modid = "pijonmod", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
-
         @SubscribeEvent
-        public static void registerRenderers(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON.get(), gr.ionio.pijonmod.client.renderer.PijonRenderer::new);
-            event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON_POOP_PROJECTILE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON.get(), PijonRenderer::new);
+            event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON_POOP_PROJECTILE.get(), ThrownItemRenderer::new);
         }
 
         @SubscribeEvent
         public static void registerLayerDefinitions(net.minecraftforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions event) {
             event.registerLayerDefinition(gr.ionio.pijonmod.client.model.PijonModel.LAYER_LOCATION, gr.ionio.pijonmod.client.model.PijonModel::createBodyLayer);
         }
-
-        // (Διαγράφηκε από εδώ το λάθος onRenderTick)
     }
 
-    // ==========================================
-    // IN-GAME EVENTS (FORGE BUS)
-    // ==========================================
-
-    // 1. Γραφικά (Τρέχει ΜΟΝΟ στον Client για να μην κρασάρει ο Server)
     @Mod.EventBusSubscriber(modid = "pijonmod", bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE, value = net.minecraftforge.api.distmarker.Dist.CLIENT)
     public static class ClientForgeEvents {
         @SubscribeEvent
-        public static void onRenderTick(net.minecraftforge.event.TickEvent.RenderTickEvent event) {
-            if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
-                gr.ionio.pijonmod.client.StinkOverlay.renderStink();
-            }
+        public static void onRenderGui(net.minecraftforge.client.event.CustomizeGuiOverlayEvent event) {
+            gr.ionio.pijonmod.client.StinkOverlay.renderStink(event.getGuiGraphics());
         }
     }
 
-    // 2. Λογική Παιχνιδιού (Τρέχει παντού, Client & Server)
-    @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = "pijonmod", bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
+    @Mod.EventBusSubscriber(modid = "pijonmod", bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
     public static class CommonForgeEvents {
-        @net.minecraftforge.eventbus.api.SubscribeEvent
+        @SubscribeEvent
         public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
             if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
                 net.minecraft.world.entity.player.Player player = event.player;
