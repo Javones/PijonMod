@@ -1,4 +1,9 @@
 {
   "item.pijonmod.pijon_spawn_egg": "Pijon Spawn Egg",
-  "entity.pijonmod.pijon": "Pijon"
+  "entity.pijonmod.pijon": "Pijon",
+  "effect.pijonmod.stink": "Stink",
+  "item.minecraft.potion.effect.stink_potion": "Potion of Stink",
+  "item.minecraft.splash_potion.effect.stink_potion": "Splash Potion of Stink",
+  "item.minecraft.lingering_potion.effect.stink_potion": "Lingering Potion of Stink",
+  "item.minecraft.tipped_arrow.effect.stink_potion": "Arrow of Stink"
 }

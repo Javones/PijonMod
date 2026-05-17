@@ -56,7 +56,15 @@ public class PijonMod {
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
-            event.accept(gr.ionio.pijonmod.init.ModItems.PIJON_SPAWN_EGG);
+            event.accept(ModItems.PIJON_SPAWN_EGG);
+        }
+
+        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(ModItems.PIJON_POOP);
+        }
+
+        if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(ModItems.PIJON_POOP);
         }
     }
 
