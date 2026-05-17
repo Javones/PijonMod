@@ -6,5 +6,8 @@
   "item.minecraft.splash_potion.effect.stink_potion": "Splash Potion of Stink",
   "item.minecraft.lingering_potion.effect.stink_potion": "Lingering Potion of Stink",
   "item.minecraft.tipped_arrow.effect.stink_potion": "Arrow of Stink",
-  "item.pijonmod.pijon_poop": "Pijon Poop"
+  "item.pijonmod.pijon_poop": "Pijon Poop",
+
+  "death.attack.pooped": "%1$s was pooped to death",
+  "death.attack.pooped": "%1$s was pooped to death by %2$s"
 }

@@ -2,6 +2,11 @@ package gr.ionio.pijonmod.entity; // Βάλτο στον φάκελο entity
 
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -43,7 +48,9 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
         Entity target = hitResult.getEntity();
 
         //Damage
-        target.hurt(this.damageSources().thrown(this, this.getOwner()), 1.0F);
+        ResourceKey<DamageType> poopDamageKey = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("pijonmod", "pooped"));
+        DamageSource poopSource = new DamageSource(this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(poopDamageKey), this, this.getOwner());
+        target.hurt(poopSource, 1.0F);
 
         //Stink
         if (target instanceof LivingEntity livingTarget) {
