@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "pijonmod:pijon_spawn_egg"
+      "id": "pijonmod:pijon_spawn_egg"
     },
     "title": {
       "text": "Gotta Catch 'Em All"
@@ -19,106 +19,64 @@
     "tame_grey": {
       "trigger": "minecraft:tame_animal",
       "conditions": {
-        "entity": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type": "pijonmod:pijon",
-              "nbt": "{Variant:0}"
-            }
-          }
-        ]
+        "entity": {
+          "type": "pijonmod:pijon",
+          "nbt": "{Variant:0}"
+        }
       }
     },
     "tame_brown": {
       "trigger": "minecraft:tame_animal",
       "conditions": {
-        "entity": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type": "pijonmod:pijon",
-              "nbt": "{Variant:1}"
-            }
-          }
-        ]
+        "entity": {
+          "type": "pijonmod:pijon",
+          "nbt": "{Variant:1}"
+        }
       }
     },
     "tame_brown_grey": {
       "trigger": "minecraft:tame_animal",
       "conditions": {
-        "entity": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type": "pijonmod:pijon",
-              "nbt": "{Variant:2}"
-            }
-          }
-        ]
+        "entity": {
+          "type": "pijonmod:pijon",
+          "nbt": "{Variant:2}"
+        }
       }
     },
     "tame_white": {
       "trigger": "minecraft:tame_animal",
       "conditions": {
-        "entity": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type": "pijonmod:pijon",
-              "nbt": "{Variant:3}"
-            }
-          }
-        ]
+        "entity": {
+          "type": "pijonmod:pijon",
+          "nbt": "{Variant:3}"
+        }
       }
     },
     "tame_purple": {
       "trigger": "minecraft:tame_animal",
       "conditions": {
-        "entity": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type": "pijonmod:pijon",
-              "nbt": "{Variant:4}"
-            }
-          }
-        ]
+        "entity": {
+          "type": "pijonmod:pijon",
+          "nbt": "{Variant:4}"
+        }
       }
     },
     "tame_dotted": {
       "trigger": "minecraft:tame_animal",
       "conditions": {
-        "entity": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type": "pijonmod:pijon",
-              "nbt": "{Variant:5}"
-            }
-          }
-        ]
+        "entity": {
+          "type": "pijonmod:pijon",
+          "nbt": "{Variant:5}"
+        }
       }
     },
     "tame_red": {
       "trigger": "minecraft:tame_animal",
       "conditions": {
-        "entity": [
-          {
-            "condition": "minecraft:entity_properties",
-            "entity": "this",
-            "predicate": {
-              "type": "pijonmod:pijon",
-              "nbt": "{Variant:6}"
-            }
-          }
-        ]
+        "entity": {
+          "type": "pijonmod:pijon",
+          "nbt": "{Variant:6}"
+        }
       }
     }
   }
