@@ -66,6 +66,16 @@ public class PijonMod {
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
             event.accept(ModItems.PIJON_POOP);
         }
+
+        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(ModItems.GREY_FEATHER);
+            event.accept(ModItems.BROWN_FEATHER);
+            event.accept(ModItems.BROWN_GREY_FEATHER);
+            event.accept(ModItems.WHITE_FEATHER);
+            event.accept(ModItems.PURPLE_FEATHER);
+            event.accept(ModItems.DOTTED_FEATHER);
+            event.accept(ModItems.RED_FEATHER);
+        }
     }
 
     @SubscribeEvent

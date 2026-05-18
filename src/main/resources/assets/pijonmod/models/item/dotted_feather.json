@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "pijonmod:item/purple_feather"
+    "layer0": "pijonmod:item/dotted_feather"
   }
 }

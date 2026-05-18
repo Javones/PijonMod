@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "F",
+    "S",
+    "P"
+  ],
+  "key": {
+    "F": {
+      "item": "minecraft:flint"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "P": {
+      "tag": "pijonmod:pijon_feathers"
+    }
+  },
+  "result": {
+    "id": "minecraft:arrow",
+    "count": 4
+  }
+}

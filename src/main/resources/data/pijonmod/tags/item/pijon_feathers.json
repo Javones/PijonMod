@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "pijonmod:grey_feather",
+    "pijonmod:brown_feather",
+    "pijonmod:brown_grey_feather",
+    "pijonmod:white_feather",
+    "pijonmod:purple_feather",
+    "pijonmod:dotted_feather",
+    "pijonmod:red_feather"
+  ]
+}

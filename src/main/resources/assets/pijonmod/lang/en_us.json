@@ -1,12 +1,23 @@
 {
   "item.pijonmod.pijon_spawn_egg": "Pijon Spawn Egg",
+
   "entity.pijonmod.pijon": "Pijon",
+
   "effect.pijonmod.stink": "Stink",
   "item.minecraft.potion.effect.stink_potion": "Potion of Stink",
   "item.minecraft.splash_potion.effect.stink_potion": "Splash Potion of Stink",
   "item.minecraft.lingering_potion.effect.stink_potion": "Lingering Potion of Stink",
   "item.minecraft.tipped_arrow.effect.stink_potion": "Arrow of Stink",
+
   "item.pijonmod.pijon_poop": "Pijon Poop",
+
+  "item.pijonmod.grey_feather": "Grey Feather",
+  "item.pijonmod.brown_feather": "Brown Feather",
+  "item.pijonmod.brown_grey_feather": "Brown-Grey Feather",
+  "item.pijonmod.white_feather": "White Feather",
+  "item.pijonmod.purple_feather": "Purple Feather",
+  "item.pijonmod.dotted_feather": "Dotted Feather",
+  "item.pijonmod.red_feather": "Red Feather",
 
   "death.attack.pooped": "%1$s was pooped to death",
   "death.attack.pooped": "%1$s was pooped to death by %2$s"
