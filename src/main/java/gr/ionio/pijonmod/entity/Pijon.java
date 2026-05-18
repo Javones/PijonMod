@@ -8,12 +8,14 @@ import javax.annotation.Nullable;
 
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -47,6 +49,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraftforge.event.ForgeEventFactory;
+
 import static net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS;
 
 public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant>, RangedAttackMob {
@@ -277,9 +281,13 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             }
 
             if (!this.level().isClientSide) {
-                if (this.random.nextInt(10) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
+                if (this.random.nextInt(10) == 0 && !ForgeEventFactory.onAnimalTame(this, player)) {
                     this.tame(player);
                     this.level().broadcastEntityEvent(this, (byte)7);
+
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        CriteriaTriggers.TAME_ANIMAL.trigger(serverPlayer, this);
+                    }
                 } else {
                     this.level().broadcastEntityEvent(this, (byte)6);
                 }
