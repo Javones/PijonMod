@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 
+import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -23,6 +24,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -571,6 +573,15 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 }
             }
         }
+    }
+
+    @Override
+    public boolean canBeAffected(MobEffectInstance effectInstance) {
+        if (effectInstance.getEffect() == ModEffects.STINK.getHolder().get()) {
+            return false;
+        }
+
+        return super.canBeAffected(effectInstance);
     }
 
     public static enum Variant implements StringRepresentable {
