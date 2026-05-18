@@ -424,6 +424,13 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+
+        Entity attacker = source.getEntity();
+
+        if (attacker != null && attacker.getType() == net.minecraft.world.entity.EntityType.ENDER_DRAGON) {
+            return false;
+        }
+
         if (this.isInvulnerableTo(source)) {
             return false;
         } else {
