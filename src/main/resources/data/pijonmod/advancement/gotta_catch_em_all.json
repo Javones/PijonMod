@@ -123,12 +123,14 @@
     }
   },
   "requirements": [
-    ["tame_grey"],
-    ["tame_brown"],
-    ["tame_brown_grey"],
-    ["tame_white"],
-    ["tame_purple"],
-    ["tame_dotted"],
-    ["tame_red"]
+    [
+      "tame_grey",
+      "tame_brown",
+      "tame_brown_grey",
+      "tame_white",
+      "tame_purple",
+      "tame_dotted",
+      "tame_red"
+    ]
   ]
 }
