@@ -18,4 +18,12 @@ public class ModItems {
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }
+
+    public static final RegistryObject<Item> GREY_FEATHER = ITEMS.register("grey_feather", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> BROWN_FEATHER = ITEMS.register("brown_feather", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> BROWN_GREY_FEATHER = ITEMS.register("brown_grey_feather", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> WHITE_FEATHER = ITEMS.register("white_feather", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> PURPLE_FEATHER = ITEMS.register("purple_feather", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> DOTTED_FEATHER = ITEMS.register("dotted_feather", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> RED_FEATHER = ITEMS.register("red_feather", () -> new Item(new Item.Properties()));
 }
