@@ -1,6 +1,8 @@
 package gr.ionio.pijonmod.entity;
 
 import com.mojang.serialization.Codec;
+
+import java.util.EnumSet;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 
@@ -21,13 +23,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.VariantHolder;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
@@ -37,6 +33,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
+import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -50,7 +47,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import static net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS;
 
-public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant> {
+public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant>, RangedAttackMob {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Pijon.class, EntityDataSerializers.INT);
 
     public float flap;
@@ -161,8 +158,10 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(9, new PijonShortFlyGoal(this));
 
-        this.goalSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
-        this.goalSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+
+        this.goalSelector.addGoal(1, new PijonBombingGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -591,4 +590,83 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         @Override
         public String getSerializedName() { return this.name; }
     }
+
+    static class PijonBombingGoal extends Goal {
+        private final Pijon pijon;
+        private int attackCooldown = 0;
+
+        public PijonBombingGoal(Pijon pijon) {
+            this.pijon = pijon;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            LivingEntity target = this.pijon.getTarget();
+            return target != null && target.isAlive();
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity target = this.pijon.getTarget();
+            if (target == null) return;
+
+            this.pijon.getLookControl().setLookAt(target, 30.0F, 30.0F);
+
+            double targetX = target.getX();
+            double targetY = target.getY() + 3.5D;
+            double targetZ = target.getZ();
+
+            double dx = targetX - this.pijon.getX();
+            double dy = targetY - this.pijon.getY();
+            double dz = targetZ - this.pijon.getZ();
+            double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            if (distance > 0.5D) {
+                double speed = 0.25D;
+                this.pijon.setDeltaMovement(dx / distance * speed, dy / distance * speed, dz / distance * speed);
+            }
+
+            double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
+
+            if (this.attackCooldown > 0) {
+                this.attackCooldown--;
+            }
+
+            if (horizontalDistance < 2.5D && this.pijon.getY() > target.getY() + 1.5D && this.attackCooldown <= 0) {
+                this.pijon.performRangedAttack(target, 1.0F);
+                this.attackCooldown = 30;
+            }
+        }
+    }
+
+    @Nullable
+    private void poop(LivingEntity target) {
+        PijonPoopEntity poop = new PijonPoopEntity(gr.ionio.pijonmod.init.ModEntities.PIJON_POOP_PROJECTILE.get(), this.level());
+        poop.setOwner(this);
+        poop.setPos(this.getX(), this.getY() + 0.2D, this.getZ());
+        double d0 = target.getX() - this.getX();
+        double d1 = target.getY(0.3333333333333333) - poop.getY();
+        double d2 = target.getZ() - this.getZ();
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+        poop.shoot(d0, d1 + d3, d2, 2.0F, 0.0F);
+        if (!this.isSilent()) {
+            this.level()
+                    .playSound(
+                            null,
+                            this.getX(),
+                            this.getY(),
+                            this.getZ(),
+                            SoundEvents.LLAMA_SPIT,
+                            this.getSoundSource(),
+                            1.0F,
+                            1.0F + (this.random.nextFloat() - this.random.nextFloat() * 0.2F)
+                    );
+
+            this.level().addFreshEntity(poop);
+        }
+    }
+
+    @Override
+    public void performRangedAttack(LivingEntity target, float pullProgress) { this.poop(target); }
 }

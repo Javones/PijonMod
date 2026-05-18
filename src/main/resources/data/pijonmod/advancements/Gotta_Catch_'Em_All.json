@@ -1,0 +1,134 @@
+{
+  "display": {
+    "icon": {
+      "item": "pijonmod:pijon_spawn_egg"
+    },
+    "title": {
+      "text": "Gotta Catch 'Em All"
+    },
+    "description": {
+      "text": "Tame all the different types of Pijones!"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "minecraft:husbandry/root",
+  "criteria": {
+    "tame_grey": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "pijonmod:pijon",
+              "nbt": "{Variant:0}"
+            }
+          }
+        ]
+      }
+    },
+    "tame_brown": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "pijonmod:pijon",
+              "nbt": "{Variant:1}"
+            }
+          }
+        ]
+      }
+    },
+    "tame_brown_grey": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "pijonmod:pijon",
+              "nbt": "{Variant:2}"
+            }
+          }
+        ]
+      }
+    },
+    "tame_white": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "pijonmod:pijon",
+              "nbt": "{Variant:3}"
+            }
+          }
+        ]
+      }
+    },
+    "tame_purple": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "pijonmod:pijon",
+              "nbt": "{Variant:4}"
+            }
+          }
+        ]
+      }
+    },
+    "tame_dotted": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "pijonmod:pijon",
+              "nbt": "{Variant:5}"
+            }
+          }
+        ]
+      }
+    },
+    "tame_red": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "pijonmod:pijon",
+              "nbt": "{Variant:6}"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    ["tame_grey"],
+    ["tame_brown"],
+    ["tame_brown_grey"],
+    ["tame_white"],
+    ["tame_purple"],
+    ["tame_dotted"],
+    ["tame_red"]
+  ]
+}
