@@ -31,6 +31,8 @@ import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -158,6 +160,9 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(9, new PijonShortFlyGoal(this));
+
+        this.goalSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        this.goalSelector.addGoal(2, new OwnerHurtTargetGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
