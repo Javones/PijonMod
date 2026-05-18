@@ -42,6 +42,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -491,13 +492,26 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         }
     }
 
-    // Αν πεθάνει το περιστέρι, ρίχνει το γράμμα κάτω για να μη χαθεί
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
+        //Drops the letter (if it exists)
         if (!this.carriedLetter.isEmpty()) {
             this.spawnAtLocation(this.carriedLetter);
         }
+
+        //Checks colour and desides which feather it will drop
+        ItemLike featherDrop = switch (this.getVariant()) {
+            case GREY -> ModItems.GREY_FEATHER.get();
+            case BROWN -> ModItems.BROWN_FEATHER.get();
+            case BROWN_GREY -> ModItems.BROWN_GREY_FEATHER.get();
+            case WHITE -> ModItems.WHITE_FEATHER.get();
+            case PURPLE -> ModItems.PURPLE_FEATHER.get();
+            case DOTTED -> ModItems.DOTTED_FEATHER.get();
+            case RED -> ModItems.RED_FEATHER.get();
+        };
+
+        //Drops the feather
+        this.spawnAtLocation(featherDrop);
     }
 
     @Override
