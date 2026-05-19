@@ -49,6 +49,11 @@ Sounds from the pigeons that we are all used to in real life are implemented to 
 ### 7. **Easter Egg:**
 Play around with classic Nametag easter eggs and discover another one...
 
+### 8. **Advancement and Ender Dragon:**
+A new advancement named **'Gotta Catch 'Em All'** was added, for when a player tames all the different Pijon Variants. 
+
+When the advancement has been acquired, the Pijones can help you defeat the Ender Dragon and are immune to its damage! Check out the lore to find out why!
+
 ## Instructions for Installing the Mod
 
 ### Requirements:
