@@ -1,11 +1,9 @@
 package gr.ionio.pijonmod.entity;
 
 import com.mojang.serialization.Codec;
-
 import java.util.EnumSet;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
-
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
 import net.minecraft.advancements.CriteriaTriggers;
