@@ -6,6 +6,7 @@ import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
+import gr.ionio.pijonmod.init.ModSounds;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -308,7 +309,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             if (itemstack.is(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS) && this.getHealth() < this.getMaxHealth()) {
                 if (!this.level().isClientSide) {
                     itemstack.consume(1, player); // Τρώει 1 σπόρο
-                    this.heal(1.0F); // Παίρνει πίσω μισή ζωή
+                    this.heal(1.0F); //Heals half a heart
                     this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
 
                     // ΕΛΕΓΧΟΣ ΜΕΤΑ ΤΟ ΦΑΓΗΤΟ:
@@ -388,7 +389,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     @Nullable
     @Override
     public SoundEvent getAmbientSound() {
-        return SoundEvents.PARROT_AMBIENT;
+        return ModSounds.PIJON_AMBIENT.get();
     }
 
     @Override
@@ -413,7 +414,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
     @Override
     protected void onFlap() {
-        this.playSound(SoundEvents.PARROT_FLY, 0.15F, 1.0F);
+        this.playSound(ModSounds.PIJON_FLY.get(), 0.15F, 1.0F);
         this.nextFlap = this.flyDist + this.flapSpeed / 2.0F;
     }
 

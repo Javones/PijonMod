@@ -3,9 +3,7 @@ package gr.ionio.pijonmod;
 import com.mojang.logging.LogUtils;
 import gr.ionio.pijonmod.client.StinkOverlay;
 import gr.ionio.pijonmod.client.renderer.PijonRenderer;
-import gr.ionio.pijonmod.init.ModEffects;
-import gr.ionio.pijonmod.init.ModItems;
-import gr.ionio.pijonmod.init.ModPotions;
+import gr.ionio.pijonmod.init.*;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -34,16 +32,18 @@ public class PijonMod {
     public PijonMod(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
-        gr.ionio.pijonmod.init.ModEntities.register(modEventBus);
-        gr.ionio.pijonmod.init.ModItems.register(modEventBus);
-        gr.ionio.pijonmod.init.ModPotions.register(modEventBus);
-        gr.ionio.pijonmod.init.ModEffects.register(modEventBus);
+        ModEntities.register(modEventBus);
+        ModItems.register(modEventBus);
+        ModPotions.register(modEventBus);
+        ModEffects.register(modEventBus);
 
         modEventBus.addListener(this::registerAttributes);
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::addCreative);
 
         MinecraftForge.EVENT_BUS.register(this);
+
+        ModSounds.SOUND_EVENTS.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

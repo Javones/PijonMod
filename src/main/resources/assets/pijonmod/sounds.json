@@ -1,0 +1,15 @@
+{
+  "pijon_ambient": {
+    "category": "neutral",
+    "sounds": [
+      "pijonmod:pijon_ambient_1",
+      "pijonmod:pijon_ambient_2"
+    ]
+  },
+  "pijon_fly": {
+    "category": "neutral",
+    "sounds": [
+      "pijonmod:pijon_fly"
+    ]
+  }
+}
