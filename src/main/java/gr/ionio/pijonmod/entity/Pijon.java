@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
 import gr.ionio.pijonmod.init.ModSounds;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -444,8 +445,15 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
 
         Entity attacker = source.getEntity();
 
-        if (attacker != null && attacker.getType() == net.minecraft.world.entity.EntityType.ENDER_DRAGON) {
-            return false;
+        if (attacker != null && attacker.getType() == EntityType.ENDER_DRAGON) {
+            if (this.isTame() && this.getOwner() instanceof ServerPlayer serverPlayer) {
+
+                AdvancementHolder advancement = serverPlayer.getServer().getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("pijonmod", "gotta_catch_em_all"));
+
+                if (advancement != null && serverPlayer.getAdvancements().getOrStartProgress(advancement).isDone()) {
+                    return false;
+                }
+            }
         }
 
         if (this.isInvulnerableTo(source)) {
