@@ -52,7 +52,7 @@ Play around with classic Nametag easter eggs and discover another one...
 ### 8. **Advancement and Ender Dragon:**
 A new advancement named **'Gotta Catch 'Em All'** was added, for when a player tames all the different Pijon Variants. 
 
-When the advancement has been acquired, the Pijones can help you defeat the Ender Dragon and are immune to its damage! Check out the lore to find out why!
+When the advancement has been acquired, the **'Pijon Poop'** item can help you defeat the Ender Dragon easier and faster by dealing more damage. To find out why, check out the lore!
 
 ## Instructions for Installing the Mod
 
