@@ -82,3 +82,7 @@ Follow these steps if you want to view or edit the source code:
 5. **Run the game:** To launch the Minecraft client directly from the code, run:
    * Windows: `gradlew runClient`
    * Mac/Linux: `./gradlew runClient`
+
+## Developed By
+* Erofili Koutalianou
+* Nefeli Lyrrou
