@@ -67,7 +67,7 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
                 AdvancementHolder advancement = serverPlayer.getServer().getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("pijonmod", "gotta_catch_em_all"));
 
                 if (advancement != null && serverPlayer.getAdvancements().getOrStartProgress(advancement).isDone()) {
-                    damage = 50.0F;
+                    damage = 20.0F;
                 }
             }
         }
