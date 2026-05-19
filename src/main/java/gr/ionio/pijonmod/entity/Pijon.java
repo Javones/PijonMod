@@ -168,6 +168,7 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(9, new PijonShortFlyGoal(this));
 
+        this.targetSelector.addGoal(0, new PijonDragonSlayerGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
 
@@ -723,4 +724,34 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
 
     @Override
     public void performRangedAttack(LivingEntity target, float pullProgress) { this.poop(target); }
+
+    static class PijonDragonSlayerGoal extends Goal {
+        private final Pijon pijon;
+
+        public PijonDragonSlayerGoal(Pijon pijon) {
+            this.pijon = pijon;
+            // Αυτό είναι Target Goal, άρα δεν τον βάζουμε να περπατάει, μόνο να "κλειδώνει" τον στόχο
+            this.setFlags(EnumSet.of(Goal.Flag.TARGET));
+        }
+
+        @Override
+        public boolean canUse() {
+            // Αν είναι άγριο ή το έχουμε βάλει να κάθεται, αγνοεί τον δράκο
+            if (!this.pijon.isTame() || this.pijon.isOrderedToSit()) {
+                return false;
+            }
+
+            // Ψάχνει για την κύρια οντότητα του Ender Dragon σε ακτίνα 64 blocks
+            net.minecraft.world.phys.AABB searchArea = this.pijon.getBoundingBox().inflate(64.0D);
+            java.util.List<net.minecraft.world.entity.boss.enderdragon.EnderDragon> dragons =
+                    this.pijon.level().getEntitiesOfClass(net.minecraft.world.entity.boss.enderdragon.EnderDragon.class, searchArea);
+
+            // Αν βρει δράκο, τον κλειδώνει ως στόχο!
+            if (!dragons.isEmpty()) {
+                this.pijon.setTarget(dragons.get(0));
+                return true;
+            }
+            return false;
+        }
+    }
 }
