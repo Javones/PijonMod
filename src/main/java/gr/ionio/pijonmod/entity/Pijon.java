@@ -167,8 +167,8 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(9, new PijonShortFlyGoal(this));
+        this.goalSelector.addGoal(1, new PijonSwarmDragonGoal(this));
 
-        this.targetSelector.addGoal(0, new PijonDragonSlayerGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
 
@@ -725,33 +725,57 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
     @Override
     public void performRangedAttack(LivingEntity target, float pullProgress) { this.poop(target); }
 
-    static class PijonDragonSlayerGoal extends Goal {
+    static class PijonSwarmDragonGoal extends Goal {
         private final Pijon pijon;
+        private net.minecraft.world.entity.boss.enderdragon.EnderDragon dragon;
 
-        public PijonDragonSlayerGoal(Pijon pijon) {
+        public PijonSwarmDragonGoal(Pijon pijon) {
             this.pijon = pijon;
-            // Αυτό είναι Target Goal, άρα δεν τον βάζουμε να περπατάει, μόνο να "κλειδώνει" τον στόχο
-            this.setFlags(EnumSet.of(Goal.Flag.TARGET));
+            // Τώρα είναι Στόχος Κίνησης και Όρασης, ΟΧΙ μάχης!
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         }
 
         @Override
         public boolean canUse() {
-            // Αν είναι άγριο ή το έχουμε βάλει να κάθεται, αγνοεί τον δράκο
             if (!this.pijon.isTame() || this.pijon.isOrderedToSit()) {
                 return false;
             }
 
-            // Ψάχνει για την κύρια οντότητα του Ender Dragon σε ακτίνα 64 blocks
             net.minecraft.world.phys.AABB searchArea = this.pijon.getBoundingBox().inflate(64.0D);
             java.util.List<net.minecraft.world.entity.boss.enderdragon.EnderDragon> dragons =
                     this.pijon.level().getEntitiesOfClass(net.minecraft.world.entity.boss.enderdragon.EnderDragon.class, searchArea);
 
-            // Αν βρει δράκο, τον κλειδώνει ως στόχο!
             if (!dragons.isEmpty()) {
-                this.pijon.setTarget(dragons.get(0));
+                this.dragon = dragons.get(0);
                 return true;
             }
             return false;
+        }
+
+        @Override
+        public void start() {
+            // Καθαρίζουμε τον στόχο μάχης (για να μην προσπαθήσουν να ρίξουν κουτσουλιές)
+            this.pijon.setTarget(null);
+        }
+
+        @Override
+        public void tick() {
+            if (this.dragon != null && this.dragon.isAlive()) {
+                // Κοιτάνε συνεχώς τον δράκο
+                this.pijon.getLookControl().setLookAt(this.dragon, 30.0F, 30.0F);
+
+                // Πετάνε προς τα πάνω και γύρω από το σώμα/κεφάλι του
+                double dx = this.dragon.getX() - this.pijon.getX();
+                double dy = (this.dragon.getY() + 5.0D) - this.pijon.getY();
+                double dz = this.dragon.getZ() - this.pijon.getZ();
+                double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                // Αν είναι πιο μακριά από 2 blocks, συνεχίζουν να πετάνε προς τα πάνω του
+                if (distance > 2.0D) {
+                    double speed = 0.35D;
+                    this.pijon.setDeltaMovement(dx / distance * speed, dy / distance * speed, dz / distance * speed);
+                }
+            }
         }
     }
 }
