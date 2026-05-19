@@ -230,6 +230,13 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 this.poopTime = this.random.nextInt(3600) + 3600;
             }
         }
+
+        if (!this.level().isClientSide && this.hasCustomName() && "jeb_".equalsIgnoreCase(this.getCustomName().getString())) {
+            if (this.tickCount % 15 == 0) {
+                int nextVariantId = (this.getVariant().getId() + 1) % 7;
+                this.setVariant(Pijon.Variant.byId(nextVariantId));
+            }
+        }
     }
 
     private void pijonPanic(double sourceX, double sourceZ) {
