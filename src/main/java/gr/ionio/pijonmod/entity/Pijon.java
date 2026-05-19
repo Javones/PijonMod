@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
@@ -36,7 +37,6 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -51,10 +51,11 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraft.world.entity.TamableAnimal;
 
 import static net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS;
 
-public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.Variant>, RangedAttackMob {
+public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>, RangedAttackMob {
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Pijon.class, EntityDataSerializers.INT);
 
     public float flap;
@@ -282,7 +283,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         ItemStack itemstack = player.getItemInHand(hand);
 
         //Taming logic
-        if (!this.isTame() && itemstack.is(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
+        if (!this.isTame() && itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
             itemstack.consume(1, player);
             if (!this.isSilent()) {
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
@@ -305,19 +306,18 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
         //Logic for tamed pijones
         if (this.isTame() && this.isOwnedBy(player)) {
-
-            if (itemstack.is(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS) && this.getHealth() < this.getMaxHealth()) {
+            if (itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS) && this.getHealth() < this.getMaxHealth()) {
                 if (!this.level().isClientSide) {
                     itemstack.consume(1, player); // Τρώει 1 σπόρο
                     this.heal(1.0F); //Heals half a heart
                     this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
 
-                    // ΕΛΕΓΧΟΣ ΜΕΤΑ ΤΟ ΦΑΓΗΤΟ:
+                    //Check for after feeding
                     if (this.getHealth() >= this.getMaxHealth()) {
-                        // Αν αυτός ο σπόρος το φούλαρε, βγάζει Καρδούλες!
+                        //If pijon is full hearts appear
                         this.level().broadcastEntityEvent(this, (byte)7);
                     } else {
-                        // Αν χρειάζεται κι άλλο φαγητό, βγάζει Πράσινα Αστεράκια
+                        //If it needs more food, green stars appear
                         ((net.minecraft.server.level.ServerLevel) this.level()).sendParticles(
                                 net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,
                                 this.getX(), this.getY() + 0.5D, this.getZ(),
@@ -363,7 +363,6 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             }
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
-
         return super.mobInteract(player, hand);
     }
 
