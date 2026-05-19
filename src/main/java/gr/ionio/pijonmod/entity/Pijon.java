@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
@@ -58,14 +59,16 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Pijon.class, EntityDataSerializers.INT);
 
     public float flap;
-    //Μεταβλητές για Γράμμα
+    //Variables for delivering letters
     public ItemStack carriedLetter = ItemStack.EMPTY;
     public String targetPlayerName = "";
+
     public float flapSpeed;
     public float oFlapSpeed;
     public float oFlap;
     private float flapping = 1.0F;
     private float nextFlap = 1.0F;
+
     public int poopTime = this.random.nextInt(3600) + 3600;
 
     public Pijon(EntityType<? extends Pijon> type, Level level) {
@@ -79,8 +82,8 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
         //Getting Biome in which the pijon is spawning in
         net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome = world.getBiome(this.blockPosition());
 
-        //Cherry grove: White or rare purple (1 in 100 chance)
-        if (biome.is(net.minecraft.tags.BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("cherry_grove")) {
+        //Cherry grove: White, dotted or rare purple (1 in 100 chance)
+        if (biome.is(BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("cherry_grove")) {
             if (this.random.nextInt(100) == 0) {
                 this.setVariant(Variant.PURPLE);
             } else if (this.random.nextInt(7) == 0){
@@ -90,11 +93,11 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             }
         }
         //Mushroom fields: Only red
-        else if (biome.is(net.minecraft.tags.BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("mushroom_fields")) {
+        else if (biome.is(BiomeTags.IS_OVERWORLD) && biome.unwrapKey().isPresent() && biome.unwrapKey().get().location().getPath().equals("mushroom_fields")) {
             this.setVariant(Variant.RED);
         }
-        //Savanna: Only brown and brown-gray
-        else if (biome.is(net.minecraft.tags.BiomeTags.IS_SAVANNA)) {
+        //Savanna: Only brown and brown-grey
+        else if (biome.is(BiomeTags.IS_SAVANNA)) {
             this.setVariant(this.random.nextBoolean() ? Variant.BROWN : Variant.BROWN_GREY);
         }
         //Rest of the biomes: Grey, brown grey-brown, white, dotted
@@ -122,7 +125,6 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
         this.goalSelector.addGoal(0, new FloatGoal(this));
 
-        //Panic when hit
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.8D));
 
         //Fear from player
@@ -273,7 +275,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
-        // 1. Taming logic
+        //Taming logic
         if (!this.isTame() && itemstack.is(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS)) {
             itemstack.consume(1, player);
             if (!this.isSilent()) {
@@ -295,7 +297,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
 
-        // 2. Logic για Tamed περιστέρια
+        //Logic for tamed pijones
         if (this.isTame() && this.isOwnedBy(player)) {
 
             if (itemstack.is(net.minecraft.tags.ItemTags.VILLAGER_PLANTABLE_SEEDS) && this.getHealth() < this.getMaxHealth()) {
@@ -319,7 +321,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
 
-            // Δέχεται ΕΙΤΕ Υπογεγραμμένο Βιβλίο, ΕΙΤΕ Χαρτί (με όνομα από το Αμόνι)
+            //Accepts either signed book or paper (with name from anvil)
             boolean isWrittenBook = itemstack.is(net.minecraft.world.item.Items.WRITTEN_BOOK);
             boolean isNamedPaper = itemstack.is(net.minecraft.world.item.Items.PAPER) && itemstack.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME);
 
@@ -328,25 +330,25 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                     this.carriedLetter = itemstack.copyWithCount(1);
                     itemstack.shrink(1);
 
-                    // Παίρνει το όνομα είτε από τον τίτλο του βιβλίου είτε από το όνομα του χαρτιού
+                    //Gets name either from title of the book either from the name of the paper
                     this.targetPlayerName = this.carriedLetter.getHoverName().getString().replaceAll("[^a-zA-Z0-9_]", "");
 
                     this.setOrderedToSit(false);
                     this.setInSittingPose(false);
 
-                    // Στέλνει το μήνυμα σε σένα ότι παρέλαβε το γράμμα/βιβλίο
+                    //Sends message that the letter was received
                     player.displayClientMessage(net.minecraft.network.chat.Component.literal("Taking letter to " + this.targetPlayerName), false);
                 }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
 
             if (!this.level().isClientSide && hand == InteractionHand.MAIN_HAND) {
-                // Reversing state (Κάθισμα/Σήκωμα)
+                //Reversing state
                 boolean isSitting = !this.isOrderedToSit();
                 this.setOrderedToSit(isSitting);
                 this.setInSittingPose(isSitting);
 
-                // Stopping all other movement
+                //Stopping all other movement
                 this.jumping = false;
                 this.navigation.stop();
                 this.setTarget(null);
@@ -557,7 +559,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
 
         @Override
         public void tick() {
-            // Ψάχνει τον παίκτη
+            //Searches for player
             if (this.targetPlayer == null || !this.targetPlayer.getName().getString().replaceAll("[^a-zA-Z0-9_]", "").equalsIgnoreCase(this.pijon.targetPlayerName)) {
                 for (Player p : this.pijon.level().players()) {
                     String pName = p.getName().getString().replaceAll("[^a-zA-Z0-9_]", "");
@@ -568,7 +570,7 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
                 }
             }
 
-            // Αν τον βρήκε, πετάει
+            //Flies if player was found
             if (this.targetPlayer != null) {
                 this.pijon.getLookControl().setLookAt(this.targetPlayer, 10.0F, (float)this.pijon.getMaxHeadXRot());
                 this.pijon.getNavigation().moveTo(this.targetPlayer, 1.5D);
