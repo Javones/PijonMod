@@ -1,18 +1,32 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    {
-      "item": "minecraft:book"
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_feather": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#pijonmod:pijon_feathers"
+          }
+        ]
+      }
     },
-    {
-      "item": "minecraft:ink_sac"
-    },
-    {
-      "tag": "pijonmod:pijon_feathers"
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "pijonmod:pijon_book_and_quill"
+      }
     }
+  },
+  "requirements": [
+    [
+      "has_feather",
+      "has_the_recipe"
+    ]
   ],
-  "result": {
-    "id": "minecraft:writable_book",
-    "count": 1
+  "rewards": {
+    "recipes": [
+      "pijonmod:pijon_book_and_quill"
+    ]
   }
 }

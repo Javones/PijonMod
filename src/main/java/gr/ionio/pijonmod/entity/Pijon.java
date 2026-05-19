@@ -197,7 +197,6 @@ public class Pijon extends ShoulderRidingEntity implements VariantHolder<Pijon.V
             Player player = this.level().getNearestPlayer(this, 8.0D);
 
             if (player != null && !player.isCreative() && !player.isSpectator()) {
-
                 boolean holdingSeeds =
                         player.getMainHandItem().is(VILLAGER_PLANTABLE_SEEDS) ||
                                 player.getOffhandItem().is(VILLAGER_PLANTABLE_SEEDS);

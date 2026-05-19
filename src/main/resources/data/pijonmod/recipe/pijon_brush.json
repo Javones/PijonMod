@@ -1,23 +1,32 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "P",
-    "C",
-    "S"
-  ],
-  "key": {
-    "P": {
-      "tag": "pijonmod:pijon_feathers"
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_feather": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#pijonmod:pijon_feathers"
+          }
+        ]
+      }
     },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "S": {
-      "item": "minecraft:stick"
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "pijonmod:pijon_brush"
+      }
     }
   },
-  "result": {
-    "id": "minecraft:brush",
-    "count": 1
+  "requirements": [
+    [
+      "has_feather",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "pijonmod:pijon_brush"
+    ]
   }
 }
