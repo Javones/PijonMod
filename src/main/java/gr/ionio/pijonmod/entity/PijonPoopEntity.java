@@ -2,15 +2,19 @@ package gr.ionio.pijonmod.entity; // Βάλτο στον φάκελο entity
 
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
@@ -39,47 +43,36 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult hitResult) {
-        Entity hitEntity = hitResult.getEntity();
+    protected void onHitEntity(net.minecraft.world.phys.EntityHitResult result) {
+        super.onHitEntity(result);
+
+        Entity target = result.getEntity();
         Entity shooter = this.getOwner();
 
-        if (shooter instanceof Pijon shooterPijon) {
-            if (hitEntity instanceof Pijon hitPijon) {
-                if (shooterPijon.isTame() && hitPijon.isTame()) {
-                    if (shooterPijon.getOwnerUUID() != null && shooterPijon.getOwnerUUID().equals(hitPijon.getOwnerUUID())) {
-                        return;
-                    }
+        float damage = 2.0F;
+
+        if (target instanceof EnderDragon || target instanceof EnderDragonPart) {
+
+            Player playerOwner = null;
+
+            if (shooter instanceof Pijon pijon && pijon.isTame()) {
+                if (pijon.getOwner() instanceof Player p) {
+                    playerOwner = p;
                 }
+            } else if (shooter instanceof Player p) {
+                playerOwner = p;
             }
 
-            if (hitEntity instanceof Player hitPlayer) {
-                if (shooterPijon.isTame() && hitPlayer.getUUID().equals(shooterPijon.getOwnerUUID())) {
-                    return;
+            if (playerOwner instanceof ServerPlayer serverPlayer) {
+                AdvancementHolder advancement = serverPlayer.getServer().getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("pijonmod", "gotta_catch_em_all"));
+
+                if (advancement != null && serverPlayer.getAdvancements().getOrStartProgress(advancement).isDone()) {
+                    damage = 50.0F;
                 }
             }
         }
 
-        Entity target = hitResult.getEntity();
-
-        //Damage
-        ResourceKey<DamageType> poopDamageKey = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("pijonmod", "pooped"));
-        DamageSource poopSource = new DamageSource(this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(poopDamageKey), this, this.getOwner());
-        target.hurt(poopSource, 1.0F);
-
-        //Stink
-        if (target instanceof LivingEntity livingTarget) {
-            livingTarget.addEffect(new MobEffectInstance(
-                    ModEffects.STINK.getHolder().get(),
-                    -1,
-                    0
-            ));
-        }
-
-        if (shooter instanceof net.minecraft.world.entity.player.Player player && hitEntity instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
-            player.setLastHurtMob(livingTarget);
-        }
-
-        super.onHitEntity(hitResult);
+        target.hurt(this.damageSources().thrown(this, shooter), damage);
     }
 
     @Override
