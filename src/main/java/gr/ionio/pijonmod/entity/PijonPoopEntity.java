@@ -13,6 +13,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
@@ -43,28 +44,37 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHitEntity(net.minecraft.world.phys.EntityHitResult result) {
+    protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
 
         Entity target = result.getEntity();
         Entity shooter = this.getOwner();
+        Player playerOwner = null;
+
+        if (shooter instanceof Pijon pijon && pijon.isTame()) {
+            if (pijon.getOwner() instanceof Player p) {
+                playerOwner = p;
+            }
+        } else if (shooter instanceof Player p) {
+            playerOwner = p;
+        }
+
+        if (playerOwner != null) {
+            if (target == playerOwner && shooter instanceof gr.ionio.pijonmod.entity.Pijon) {
+                return;
+            }
+            if (target instanceof TamableAnimal tamableTarget) {
+                if (tamableTarget.isOwnedBy(playerOwner)) {
+                    return;
+                }
+            }
+        }
 
         float damage = 2.0F;
 
         if (target instanceof EnderDragon || target instanceof EnderDragonPart) {
-
-            Player playerOwner = null;
-
-            if (shooter instanceof Pijon pijon && pijon.isTame()) {
-                if (pijon.getOwner() instanceof Player p) {
-                    playerOwner = p;
-                }
-            } else if (shooter instanceof Player p) {
-                playerOwner = p;
-            }
-
             if (playerOwner instanceof ServerPlayer serverPlayer) {
-                AdvancementHolder advancement = serverPlayer.getServer().getAdvancements().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("pijonmod", "gotta_catch_em_all"));
+                AdvancementHolder advancement = serverPlayer.getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath("pijonmod", "gotta_catch_em_all"));
 
                 if (advancement != null && serverPlayer.getAdvancements().getOrStartProgress(advancement).isDone()) {
                     damage = 20.0F;
@@ -73,6 +83,10 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
         }
 
         target.hurt(this.damageSources().thrown(this, shooter), damage);
+
+        if (target instanceof LivingEntity livingTarget) {
+            livingTarget.addEffect(new MobEffectInstance(ModEffects.STINK.getHolder().get(), MobEffectInstance.INFINITE_DURATION, 0));
+        }
     }
 
     @Override
