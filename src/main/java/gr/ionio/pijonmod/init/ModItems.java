@@ -11,7 +11,7 @@ import net.minecraftforge.registries.RegistryObject;
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, "pijonmod");
 
-    public static final RegistryObject<Item> PIJON_SPAWN_EGG = ITEMS.register("pijon_spawn_egg", () -> new ForgeSpawnEggItem(ModEntities.PIJON, 0x808080, 0x00FF00, new Item.Properties()));
+    public static final RegistryObject<Item> PIJON_SPAWN_EGG = ITEMS.register("pijon_spawn_egg", () -> new ForgeSpawnEggItem(ModEntities.PIJON, 0x626c79, 0x784e82, new Item.Properties()));
 
     public static final RegistryObject<Item> PIJON_POOP = ITEMS.register("pijon_poop", () -> new PijonPoopItem(new Item.Properties()));
 

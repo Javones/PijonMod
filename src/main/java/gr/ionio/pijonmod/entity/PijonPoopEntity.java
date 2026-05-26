@@ -47,6 +47,18 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
 
+        if (result.getEntity() instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
+
+            // Το -1 κάνει το Effect να μην τελειώνει ποτέ!
+            livingTarget.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    gr.ionio.pijonmod.init.ModEffects.STINK.getHolder().get(),
+                    -1,
+                    0,
+                    false,
+                    true
+            ));
+        }
+
         Entity target = result.getEntity();
         Entity shooter = this.getOwner();
         Player playerOwner = null;
