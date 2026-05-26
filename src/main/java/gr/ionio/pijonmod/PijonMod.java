@@ -2,6 +2,7 @@ package gr.ionio.pijonmod;
 
 import com.mojang.logging.LogUtils;
 import gr.ionio.pijonmod.client.StinkOverlay;
+import gr.ionio.pijonmod.client.model.PijonModel;
 import gr.ionio.pijonmod.client.renderer.PijonRenderer;
 import gr.ionio.pijonmod.entity.PijonPoopEntity;
 import gr.ionio.pijonmod.init.*;
@@ -129,31 +130,31 @@ public class PijonMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON.get(), PijonRenderer::new);
-            event.registerEntityRenderer(gr.ionio.pijonmod.init.ModEntities.PIJON_POOP_PROJECTILE.get(), ThrownItemRenderer::new);
+            event.registerEntityRenderer(ModEntities.PIJON.get(), PijonRenderer::new);
+            event.registerEntityRenderer(ModEntities.PIJON_POOP_PROJECTILE.get(), ThrownItemRenderer::new);
         }
 
         @SubscribeEvent
-        public static void registerLayerDefinitions(net.minecraftforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions event) {
-            event.registerLayerDefinition(gr.ionio.pijonmod.client.model.PijonModel.LAYER_LOCATION, gr.ionio.pijonmod.client.model.PijonModel::createBodyLayer);
+        public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+            event.registerLayerDefinition(gr.ionio.pijonmod.client.model.PijonModel.LAYER_LOCATION, PijonModel::createBodyLayer);
         }
     }
 
-    @Mod.EventBusSubscriber(modid = "pijonmod", bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE, value = net.minecraftforge.api.distmarker.Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = "pijonmod", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
     public static class ClientForgeEvents {
         @SubscribeEvent
-        public static void onRenderGui(net.minecraftforge.client.event.CustomizeGuiOverlayEvent event) {
-            gr.ionio.pijonmod.client.StinkOverlay.renderStink(event.getGuiGraphics());
+        public static void onRenderGui(CustomizeGuiOverlayEvent event) {
+            StinkOverlay.renderStink(event.getGuiGraphics());
         }
     }
 
-    @Mod.EventBusSubscriber(modid = "pijonmod", bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
+    @Mod.EventBusSubscriber(modid = "pijonmod", bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class CommonForgeEvents {
         @SubscribeEvent
-        public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
-            if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
+        public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+            if (event.phase == TickEvent.Phase.END) {
                 net.minecraft.world.entity.player.Player player = event.player;
-                if (player != null && player.hasEffect(gr.ionio.pijonmod.init.ModEffects.STINK.getHolder().get())) {
+                if (player != null && player.hasEffect(ModEffects.STINK.getHolder().get())) {
                     if (player.isInWater()) {
                         player.removeEffect(gr.ionio.pijonmod.init.ModEffects.STINK.getHolder().get());
                     }

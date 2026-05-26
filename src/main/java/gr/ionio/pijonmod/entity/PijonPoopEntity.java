@@ -3,14 +3,9 @@ package gr.ionio.pijonmod.entity;
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -47,22 +42,10 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
 
-        if (result.getEntity() instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
-
-            // Το -1 κάνει το Effect να μην τελειώνει ποτέ!
-            livingTarget.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                    gr.ionio.pijonmod.init.ModEffects.STINK.getHolder().get(),
-                    -1,
-                    0,
-                    false,
-                    true
-            ));
-        }
-
         Entity target = result.getEntity();
         Entity shooter = this.getOwner();
         Player playerOwner = null;
-
+        
         if (shooter instanceof Pijon pijon && pijon.isTame()) {
             if (pijon.getOwner() instanceof Player p) {
                 playerOwner = p;
@@ -97,7 +80,9 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
         target.hurt(this.damageSources().thrown(this, shooter), damage);
 
         if (target instanceof LivingEntity livingTarget) {
-            livingTarget.addEffect(new MobEffectInstance(ModEffects.STINK.getHolder().get(), MobEffectInstance.INFINITE_DURATION, 0));
+            MobEffectInstance stinkInstance = new MobEffectInstance(ModEffects.STINK.getHolder().get(), MobEffectInstance.INFINITE_DURATION, 0);
+
+            livingTarget.addEffect(stinkInstance);
         }
     }
 
