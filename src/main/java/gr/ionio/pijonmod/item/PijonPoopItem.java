@@ -39,7 +39,6 @@ public class PijonPoopItem extends Item implements ProjectileItem {
         if (!player.getAbilities().instabuild) {
             itemStack.shrink(1);
         }
-
         return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }
 
