@@ -3,12 +3,21 @@ package gr.ionio.pijonmod;
 import com.mojang.logging.LogUtils;
 import gr.ionio.pijonmod.client.StinkOverlay;
 import gr.ionio.pijonmod.client.renderer.PijonRenderer;
+import gr.ionio.pijonmod.entity.PijonPoopEntity;
 import gr.ionio.pijonmod.init.*;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.core.Position;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -22,6 +31,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import org.slf4j.Logger;
 
 @Mod("pijonmod")
@@ -47,7 +58,29 @@ public class PijonMod {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("Pijon Mod is loading...");
+        event.enqueueWork(() -> {
+           DispenserBlock.registerBehavior(ModItems.PIJON_POOP.get(), new DefaultDispenseItemBehavior() {
+               @Override
+               protected ItemStack execute (BlockSource source, ItemStack stack) {
+                   Level level = source.level();
+
+                   Direction direction = source.state().getValue(DispenserBlock.FACING);
+                   Position position = DispenserBlock.getDispensePosition(source);
+                   PijonPoopEntity poop = new PijonPoopEntity(
+                           ModEntities.PIJON_POOP_PROJECTILE.get(),
+                           position.x(), position.y(), position.z(), level
+                   );
+
+                   poop.shoot((double)direction.getStepX(), (double)((float)direction.getStepY() + 0.1F), (double)direction.getStepZ(), 1.1F, 6.0F);
+
+                   level.addFreshEntity(poop);
+
+                   stack.shrink(1);
+
+                   return stack;
+               }
+           });
+        });
     }
 
     private void registerAttributes(net.minecraftforge.event.entity.EntityAttributeCreationEvent event) {
