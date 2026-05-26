@@ -60,6 +60,7 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
     private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Pijon.class, EntityDataSerializers.INT);
 
     public float flap;
+
     //Variables for delivering letters
     public ItemStack carriedLetter = ItemStack.EMPTY;
     public String targetPlayerName = "";
@@ -513,7 +514,7 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
             this.spawnAtLocation(this.carriedLetter);
         }
 
-        //Checks colour and desides which feather it will drop
+        //Checks colour and decides which feather it will drop
         ItemLike featherDrop = switch (this.getVariant()) {
             case GREY -> ModItems.GREY_FEATHER.get();
             case BROWN -> ModItems.BROWN_FEATHER.get();

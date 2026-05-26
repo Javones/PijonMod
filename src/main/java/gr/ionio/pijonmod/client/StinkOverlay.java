@@ -16,7 +16,6 @@ public class StinkOverlay {
             int width = minecraft.getWindow().getGuiScaledWidth();
             int height = minecraft.getWindow().getGuiScaledHeight();
 
-            // Κρατάμε τα χρώματα στο 100% φωτεινότητα
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.enableBlend();
 

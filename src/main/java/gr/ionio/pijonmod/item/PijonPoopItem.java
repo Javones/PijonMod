@@ -25,12 +25,10 @@ public class PijonPoopItem extends Item implements ProjectileItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
 
-        // Ο ήχος όταν το πετάς
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.SNOWBALL_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (!level.isClientSide) {
-            // ΕΔΩ ΕΙΝΑΙ Η ΜΑΓΕΙΑ: Πλέον δημιουργεί το δικό σου Entity, όχι χιονόμπαλα!
             PijonPoopEntity poop = new PijonPoopEntity(gr.ionio.pijonmod.init.ModEntities.PIJON_POOP_PROJECTILE.get(), player, level);
             poop.setItem(itemStack);
             poop.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
@@ -47,7 +45,6 @@ public class PijonPoopItem extends Item implements ProjectileItem {
 
     @Override
     public Projectile asProjectile(Level level, Position position, ItemStack itemStack, Direction direction) {
-        // Για όταν το ρίχνει το Dispenser
         PijonPoopEntity poop = new PijonPoopEntity(gr.ionio.pijonmod.init.ModEntities.PIJON_POOP_PROJECTILE.get(), position.x(), position.y(), position.z(), level);
         poop.setItem(itemStack);
         return poop;

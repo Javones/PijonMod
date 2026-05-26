@@ -64,10 +64,7 @@ public class PijonVillageSpawner {
                                 newPijon.moveTo(spawnPos, 0.0F, 0.0F);
                                 newPijon.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), MobSpawnType.NATURAL, null);
                                 level.addFreshEntity(newPijon);
-                                //System.out.println("Success! Pijon spawned at: " + spawnPos);
                             }
-                        } else {
-                            //System.out.println("Failed: No suitable ground found.");
                         }
                     }
                 }

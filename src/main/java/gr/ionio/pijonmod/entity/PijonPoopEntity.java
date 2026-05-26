@@ -1,4 +1,4 @@
-package gr.ionio.pijonmod.entity; // Βάλτο στον φάκελο entity
+package gr.ionio.pijonmod.entity;
 
 import gr.ionio.pijonmod.init.ModEffects;
 import gr.ionio.pijonmod.init.ModItems;

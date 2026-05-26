@@ -99,27 +99,24 @@ public class PijonModel<T extends Pijon> extends EntityModel<T> {
 		this.left_leg.xRot = (float)Math.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
 		this.right_leg.xRot = (float)Math.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount;
 
-		// --- Η ΔΙΟΡΘΩΜΕΝΗ ΛΟΓΙΚΗ ΓΙΑ ΤΟ ΚΑΘΙΣΜΑ ---
 		if (entity.isInSittingPose()) {
-			// Κατεβάζουμε σταθερά ΟΛΑ τα κομμάτια κατά 2.0 pixels
+			//Pushing down all the pieces by 2.0 pixels
 			this.head.y = 16.0F + 2.0F;
 			this.body.y = 16.5F + 2.0F;
 			this.left_wing.y = 16.9F + 2.0F;
 			this.right_wing.y = 16.9F + 2.0F;
 			this.tail.y = 21.1F + 2.0F;
 
-			// Κρύβουμε τα πόδια
 			this.right_leg.visible = false;
 			this.left_leg.visible = false;
 		} else {
-			// Επαναφορά στην αρχική τους θέση όταν σηκώνεται
+			//Back to normal state
 			this.head.y = 16.0F;
 			this.body.y = 16.5F;
 			this.left_wing.y = 16.9F;
 			this.right_wing.y = 16.9F;
 			this.tail.y = 21.1F;
 
-			// Εμφανίζουμε πάλι τα πόδια
 			this.right_leg.visible = true;
 			this.left_leg.visible = true;
 		}
