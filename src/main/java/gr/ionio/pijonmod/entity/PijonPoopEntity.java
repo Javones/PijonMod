@@ -77,7 +77,13 @@ public class PijonPoopEntity extends ThrowableItemProjectile {
             }
         }
 
-        target.hurt(this.damageSources().thrown(this, shooter), damage);
+        net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> POOPED_DAMAGE =
+                net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DAMAGE_TYPE, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("pijonmod", "pooped"));
+
+        net.minecraft.world.damagesource.DamageSource poopSource =
+                new net.minecraft.world.damagesource.DamageSource(this.level().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getHolderOrThrow(POOPED_DAMAGE), this, shooter);
+
+        target.hurt(poopSource, damage);
 
         if (target instanceof LivingEntity livingTarget) {
             MobEffectInstance stinkInstance = new MobEffectInstance(ModEffects.STINK.getHolder().get(), MobEffectInstance.INFINITE_DURATION, 0);

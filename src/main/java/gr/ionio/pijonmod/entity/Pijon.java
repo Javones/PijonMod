@@ -1,6 +1,5 @@
 package gr.ionio.pijonmod.entity;
 
-import com.mojang.serialization.Codec;
 import java.util.EnumSet;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
@@ -630,7 +629,7 @@ public class Pijon extends TamableAnimal implements VariantHolder<Pijon.Variant>
         DOTTED(5, "dotted"),
         RED(6, "red");
 
-        public static final Codec<Pijon.Variant> CODEC = StringRepresentable.fromEnum(Pijon.Variant::values);
+        public static final StringRepresentable.EnumCodec<Pijon.Variant> CODEC = StringRepresentable.fromEnum(Pijon.Variant::values);
         private static final IntFunction<Pijon.Variant> BY_ID = ByIdMap.continuous(Pijon.Variant::getId, values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
         final int id;
         private final String name;

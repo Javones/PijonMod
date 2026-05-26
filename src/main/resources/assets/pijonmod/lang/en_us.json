@@ -10,6 +10,7 @@
   "item.minecraft.tipped_arrow.effect.stink_potion": "Arrow of Stink",
 
   "item.pijonmod.pijon_poop": "Pijon Poop",
+  "entity.pijonmod.pijon_poop_projectile": "Pijon Poop",
 
   "item.pijonmod.grey_feather": "Grey Feather",
   "item.pijonmod.brown_feather": "Brown Feather",
@@ -20,5 +21,5 @@
   "item.pijonmod.red_feather": "Red Feather",
 
   "death.attack.pooped": "%1$s was pooped to death",
-  "death.attack.pooped": "%1$s was pooped to death by %2$s"
+  "death.attack.pooped.player": "%1$s was pooped to death by %2$s"
 }
