@@ -36,7 +36,7 @@ When in multiplayer, the Pijones are able to deliver letters from player to play
 The addition of the Pijones also brings new items:
 * **Feather Variants:** When a Pijon dies, depending on its colour, it drops a different coloured feather. This acts just like a chicken's feather and allows you to craft book and quill, arrows and brushes.
 
-* **Pijon Poops:** Just like in real life, the Pijones will randomly drop poops all around the world! This is dropped as an item that the player can pick up. It can be thrown to other players, dealing damage to them and attaching them the **Stink effect**! This effect stays on the player for ever, unless they 'bathe' by touching water.
+* **Pijon Poops:** Just like in real life, the Pijones will randomly drop poops all around the world! This is dropped as an item that the player can pick up. It can be thrown to other players, dealing damage to them and attaching them the **Stink effect**! This effect stays on the player for ever, unless they 'bathe' by touching water. Pijon poops can also be placed in dispensers!
 
 * **Stink potions and tipped arrows:** When you've acquired even a singular Pijon poop, you can brew it into a **Stink Potion** using **Awkward Potions** as a base. This attaches to the player the **Stink Effect**, just like the Pijon poop, and also grants them the **Poison Effect** for a few seconds.
 
